@@ -26,8 +26,8 @@ export function createProrage<T = any>(options: Options = {}) {
   const getters: Getter[] = []
 
   options.plugins?.forEach(({ writer, reader, setter, getter }) => {
-    if (writer) writers.unshift(writer)
-    if (reader) readers.push(reader)
+    if (writer) writers.push(writer)
+    if (reader) readers.unshift(reader)
     if (setter) setters.push(setter)
     if (getter) getters.unshift(getter)
   })
