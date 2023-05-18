@@ -1,5 +1,6 @@
 import { ProragePlugin } from '../types'
 import { typeOf } from '../utils'
+import { useReceiver } from '../hooks'
 
 export type ExpiresOptions = {
   primaryKey?: string
@@ -31,7 +32,8 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
         const expire = value[primaryKey]
 
         if (expire < Date.now()) {
-          delete this[key]
+          const receiver = useReceiver()
+          delete receiver[key]
           return
         } else {
           return value.value
