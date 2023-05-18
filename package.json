@@ -1,0 +1,42 @@
+{
+  "name": "prorage",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/prorage.umd.js",
+  "module": "./dist/prorage.js",
+  "browser": "./dist/prorage.umd.cjs",
+  "exports": {
+    ".": {
+      "import": "./dist/prorage.js",
+      "require": "./dist/prorage.umd.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.1.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0",
+    "vite-plugin-dts": "^2.3.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "prettier --write"
+    ]
+  },
+  "author": "aweikalee",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "lib",
+    "README.md"
+  ]
+}
