@@ -4,6 +4,9 @@
 `Prorage` = `Proxy` + `Storage`
 
 ## 安装
+```sh
+npm install prorage
+```
 
 ## 使用
 ```js
