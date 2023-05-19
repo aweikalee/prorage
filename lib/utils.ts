@@ -16,6 +16,24 @@ export function isSymbol(val: unknown): val is symbol {
   return typeof val === 'symbol'
 }
 
+export function objectType(val: unknown) {
+  // like "[object Object]"
+  const rawType = Object.prototype.toString.call(val).slice(8, -1)
+
+  switch (rawType) {
+    case 'Object':
+    case 'Array':
+      return 'common'
+    case 'Map':
+    case 'Set':
+    case 'WeakMap':
+    case 'WeakSet':
+      return 'collection'
+    default:
+      return 'invalid'
+  }
+}
+
 export function toRaw<T>(proxyed: T): T {
   const raw = proxyed && (proxyed as any)[symbols.RAW]
   return raw ? toRaw(raw) : proxyed

@@ -60,3 +60,26 @@ describe('objects tests', () => {
     expect(memoryStorage.getItem('regexp')).toBe(JSON.stringify(value))
   })
 })
+
+describe('key tests', () => {
+  const { storage } = createProrage({
+    storage: memoryStorage,
+  })
+
+  it('number', () => {
+    storage[1] = { 0: 'number' }
+    expect(memoryStorage.getItem('1')).toBe(JSON.stringify({ 0: 'number' }))
+  })
+
+  it('symbol', async () => {
+    // set symbol as key in root node will throw error
+    const fn = async () => (storage[Symbol()] = 'symbol')
+    await expect(fn()).rejects.toBeTruthy()
+
+    // else will be ignored
+    storage.symbol = {
+      [Symbol()]: 'symbol',
+    }
+    expect(memoryStorage.getItem('symbol')).toBe('{}')
+  })
+})

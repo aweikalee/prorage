@@ -155,7 +155,9 @@ export default <ProragePlugin>{
 | Date | ❌ | 计划支持 |
 | RegExp | ❌ | 计划支持 |
 | Function | ❌ | 还原时会丢失作用域 |
-| Set | ❌ | 计划支持 |
-| Map | ❌ | 计划支持 |
+| Set | ❌ | 与基础设计相性较差, 放弃支持 |
+| Map | ❌ | 与基础设计相性较差, 放弃支持 |
 | WeakSet | ❌ | 没有实现的价值 |
 | WeakMap | ❌ | 没有实现的价值 |
+
+使用 `symbol` 作为**键名**(Key)时, 通常将会被忽略. 若是作为根节点的键名, 则会在 `storage.setItem` 时抛出异常.

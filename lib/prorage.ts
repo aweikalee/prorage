@@ -7,7 +7,7 @@ import {
   ProragePlugin,
   Replacer,
 } from './types'
-import { isObject, isSymbol, mergeReplacers } from './utils'
+import { isObject, isSymbol, mergeReplacers, objectType } from './utils'
 import * as symbols from './symbols'
 import { runHook, useParent, usePaths, useReceiver } from './hooks'
 
@@ -62,12 +62,12 @@ export function createProrage<T = any>(options: Options = {}) {
     return JSON.parse(_storage.getItem(key as string) as string, reader)
   }
 
-  function toProxy(
-    parent: any,
-    target: any,
-    paths: (string | symbol)[] = []
-  ): any {
+  function toProxy(parent: any, target: any, paths: (string | symbol)[]): any {
     if (!isObject(target)) return target
+
+    // skip Map, Set, WeakMap, WeakSet
+    // skip Function, Date, RegExp, Error...
+    if (objectType(target) !== 'common') return target
 
     const privates = {
       [symbols.RAW]: target,
