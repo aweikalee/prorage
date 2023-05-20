@@ -1,6 +1,6 @@
 {
   "name": "prorage",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Storage used like object, Based on ES6 Proxy.",
   "type": "module",
   "main": "./dist/prorage.umd.js",
