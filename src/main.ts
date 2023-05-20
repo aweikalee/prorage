@@ -1,4 +1,9 @@
-import { createProrage, createExpiresPlugin } from '../lib'
+import {
+  createProrage,
+  createExpiresPlugin,
+  primitivesPlugin,
+  objectsPlugin,
+} from '../lib'
 
 const { plugin: expiresPlugin, useExpires } = createExpiresPlugin({
   multiplier: 1,
@@ -6,7 +11,7 @@ const { plugin: expiresPlugin, useExpires } = createExpiresPlugin({
 
 const { storage } = createProrage({
   storage: localStorage,
-  plugins: [expiresPlugin],
+  plugins: [expiresPlugin, primitivesPlugin(), objectsPlugin()],
 })
 
 window.storage = storage

@@ -9,18 +9,21 @@ export function typeOf(argument: unknown) {
 }
 
 export function isObject(val: unknown): val is Record<any, any> {
-  return val !== null && typeof val === 'object'
+  return typeOf(val) === 'object'
 }
 
 export function isSymbol(val: unknown): val is symbol {
   return typeof val === 'symbol'
 }
 
-export function objectType(val: unknown) {
+export function rawType(val: unknown) {
   // like "[object Object]"
-  const rawType = Object.prototype.toString.call(val).slice(8, -1)
+  return Object.prototype.toString.call(val).slice(8, -1)
+}
+export function objectType(val: unknown) {
+  const type = rawType(val)
 
-  switch (rawType) {
+  switch (type) {
     case 'Object':
     case 'Array':
       return 'common'
@@ -47,5 +50,15 @@ export function mergeReplacers(replacers: Replacer[]): Replacer {
       (value, replacer) => replacer.call(this, key, value),
       value
     )
+  }
+}
+
+const primaryKeys = new Set()
+export function createPluginPrimaryKey(name: string) {
+  if (primaryKeys.has(name)) {
+    throw new Error(`primaryKey "${name}" already exists`)
+  } else {
+    primaryKeys.add(name)
+    return `#p_${name}_`
   }
 }

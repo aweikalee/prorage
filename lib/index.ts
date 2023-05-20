@@ -5,3 +5,6 @@ export * from './utils'
 export * as flags from './symbols'
 
 export * from './plugins/expires'
+export * from './plugins/objects'
+export * from './plugins/primitives'
+export * as primaryKeys from './plugins/primaryKeys'

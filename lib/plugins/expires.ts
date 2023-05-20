@@ -1,6 +1,7 @@
 import { ProragePlugin } from '../types'
 import { typeOf } from '../utils'
 import { useReceiver } from '../hooks'
+import * as primaryKeys from './primaryKeys'
 
 export type ExpiresOptions = {
   primaryKey?: string
@@ -8,7 +9,7 @@ export type ExpiresOptions = {
 }
 
 export function createExpiresPlugin(options: ExpiresOptions = {}) {
-  const { primaryKey = '#p_expires_', multiplier = 24 * 60 * 60 * 1000 } =
+  const { primaryKey = primaryKeys.expires, multiplier = 24 * 60 * 60 * 1000 } =
     options
   let _expires = 0
 
