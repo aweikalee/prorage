@@ -222,6 +222,9 @@ export default <ProragePlugin>{
 - Hook 函数应在 `getter/setter` 中使用.
 - `setter` 中 `useReceiver` 仅赋值操作的节点可以获取到对应的代理对象, 其他节点均为 `undefined`.
 
+### 执行顺序
+根据 `plugins` 数组的顺序, `writer` 与 `setter` 按顺序执行, `reader` 与 `getter` 按逆序执行.
+
 ## 数据类型支持情况
 
 储存基于 `JSON.stringify` 与 `JSON.parse` 实现, 当前只支持标准 `JSON` 数据.
