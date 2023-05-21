@@ -1,20 +1,20 @@
 import { StorageLike } from '../../lib'
 
-interface StateObj {
-  [key: string]: string | null
+class MemoryStorage {
+  get length() {
+    return Object.keys(this).length
+  }
+  getItem(key: string) {
+    return this[key] ?? null
+  }
+  setItem(key: string, value: any) {
+    this[key] = value
+  }
+  removeItem(key: string) {
+    delete this[key]
+  }
 }
 
 export function createMemoryStorage(): StorageLike {
-  const state: StateObj = {}
-  return {
-    getItem(key: string) {
-      return state[key] ?? null
-    },
-    setItem(key: string, value: any) {
-      state[key] = value
-    },
-    removeItem(key: string) {
-      delete state[key]
-    },
-  }
+  return new MemoryStorage()
 }

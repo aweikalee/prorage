@@ -4,35 +4,70 @@ import { Replacer, createProrage, mergeReplacers, prefixWrap } from '../lib'
 
 const memoryStorage = createMemoryStorage()
 
-describe('basic tests', () => {
-  it('basic setItem', () => {
-    const { storage } = createProrage({
-      storage: memoryStorage,
-    })
+describe('basic', () => {
+  const options: Parameters<typeof createProrage>[0] = {
+    storage: memoryStorage,
+  }
+  const { storage: writer } = createProrage(options)
 
-    storage.foo = 'bar'
+  const { storage: reader } = createProrage(options)
+
+  it('setItem', () => {
+    writer.foo = 'bar'
 
     expect(memoryStorage.getItem('foo')).toBe(JSON.stringify('bar'))
   })
 
-  it('basic getItem', () => {
-    const { storage } = createProrage({
-      storage: memoryStorage,
-    })
-
-    expect(storage.foo).toBe('bar')
+  it('getItem', () => {
+    expect(reader.foo).toBe('bar')
   })
 
-  it('basic removeItem', () => {
-    const { storage } = createProrage({
-      storage: memoryStorage,
-    })
-
-    storage.foo = 'bar'
+  it('removeItem', () => {
+    writer.foo = 'bar'
     expect(memoryStorage.getItem('foo')).toBe(JSON.stringify('bar'))
 
-    delete storage.foo
+    delete writer.foo
     expect(memoryStorage.getItem('foo')).toBe(null)
+  })
+
+  it('clear', () => {
+    writer.foo = 'bar'
+    writer.baz = 'qux'
+    writer.clear()
+
+    expect(memoryStorage.getItem('foo')).toBe(null)
+    expect(memoryStorage.getItem('baz')).toBe(null)
+  })
+
+  it('keys', () => {
+    writer.clear()
+    expect(Object.keys(writer)).toEqual([])
+
+    writer.foo = 'bar'
+    writer.baz = {
+      qux: 'quux',
+    }
+
+    expect(Object.keys(reader)).toEqual(['foo', 'baz'])
+    expect(Object.keys(reader.baz)).toEqual(['qux'])
+  })
+
+  it('length', () => {
+    writer.clear()
+    expect(writer.length).toBe(0)
+    expect(reader.length).toBe(0)
+
+    writer.foo = 'bar'
+    expect(writer.length).toBe(1)
+    expect(reader.length).toBe(1)
+
+    writer.baz = 'qux'
+    expect(writer.length).toBe(2)
+    expect(reader.length).toBe(2)
+
+    delete writer.foo
+    expect(writer.length).toBe(1)
+    expect(reader.length).toBe(1)
   })
 })
 
@@ -80,16 +115,46 @@ describe('options - stringify, parse', () => {
 })
 
 describe('options - prefix', () => {
-  const { storage } = createProrage({
+  const { storage: foo } = createProrage({
     storage: memoryStorage,
-    prefix: 'test',
+    prefix: 'foo',
+  })
+
+  const { storage: bar } = createProrage({
+    storage: memoryStorage,
+    prefix: 'bar',
   })
 
   it('prefix', () => {
-    storage.prefix = 'test'
+    foo.prefix = 'test'
     expect(memoryStorage.getItem('prefix')).not.toBe(JSON.stringify('test'))
-    expect(memoryStorage.getItem(prefixWrap('prefix', 'test'))).toBe(
+    expect(memoryStorage.getItem(prefixWrap('foo', 'prefix'))).toBe(
       JSON.stringify('test')
     )
+  })
+
+  it('length', () => {
+    expect(foo.length).toBe(1)
+    expect(bar.length).toBe(0)
+
+    bar.foo = 1
+    bar.bar = 2
+    expect(foo.length).toBe(1)
+    expect(bar.length).toBe(2)
+  })
+
+  it('keys', () => {
+    expect(Object.keys(foo)).toEqual(['prefix'])
+    expect(Object.keys(bar)).toEqual(['foo', 'bar'])
+  })
+
+  it('clear', () => {
+    foo.clear()
+    expect(foo.length).toBe(0)
+    expect(bar.length).toBe(2)
+
+    bar.clear()
+    expect(foo.length).toBe(0)
+    expect(bar.length).toBe(0)
   })
 })

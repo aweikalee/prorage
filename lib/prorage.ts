@@ -66,7 +66,7 @@ export function createProrage<T = any>(options: Options = {}) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
     const value = target[key as keyof T]
-    const _key = prefixWrap(key, prefix)
+    const _key = prefixWrap(prefix, key)
     if (value === undefined) {
       _storage.removeItem(key)
     } else {
@@ -77,7 +77,7 @@ export function createProrage<T = any>(options: Options = {}) {
   function getItem(key: string | symbol) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
-    const _key = prefixWrap(key, prefix)
+    const _key = prefixWrap(prefix, key)
     const text = _storage.getItem(_key) as string
     return parse(text, reader)
   }
@@ -89,9 +89,55 @@ export function createProrage<T = any>(options: Options = {}) {
     // skip Function, Date, RegExp, Error...
     if (objectType(target) !== 'common') return target
 
-    const privates = {
-      [symbols.RAW]: target,
-      [symbols.PATHS]: paths,
+    const isRoot = parent === null && paths.length === 0
+
+    const privates = Object.assign(
+      isRoot
+        ? {
+            get length() {
+              const keys = ownKeys()
+              return keys.length
+            },
+
+            clear() {
+              const keys = ownKeys()
+              keys.forEach((key) => {
+                const _key = prefixWrap(prefix, key)
+                _storage.removeItem(_key)
+                Reflect.deleteProperty(target, key)
+              })
+            },
+          }
+        : {},
+      {
+        [symbols.RAW]: target,
+        [symbols.PATHS]: paths,
+      }
+    )
+
+    function ownKeys() {
+      let keys = Object.keys(_storage)
+
+      if (prefix) {
+        const _prefix = prefixWrap(prefix, '')
+        const newKeys: typeof keys = []
+        keys.forEach((key) => {
+          if (String(key).startsWith(_prefix)) {
+            newKeys.push(prefixUnwrap(prefix, key))
+          }
+        })
+        keys = newKeys
+      }
+
+      // `Object.keys`, return value contains only the enumerable keys.
+      // make it become the enumerable key, by setting the key.
+      keys.forEach((key) => {
+        if (!(key in target)) {
+          target[key] = undefined
+        }
+      })
+
+      return keys
     }
 
     const proxyed = new Proxy(target, {
@@ -103,7 +149,7 @@ export function createProrage<T = any>(options: Options = {}) {
 
         if (isSymbol(key)) return value
 
-        if (paths.length === 0 && value === undefined) {
+        if (isRoot && value === undefined) {
           value = getItem(key)
           Reflect.set(target, key, value, receiver)
         }
@@ -125,7 +171,7 @@ export function createProrage<T = any>(options: Options = {}) {
           }
         )
 
-        if (res) setItem(paths.length === 0 ? key : paths[0])
+        if (res) setItem(isRoot ? key : paths[0])
 
         return res
       },
@@ -133,16 +179,21 @@ export function createProrage<T = any>(options: Options = {}) {
       deleteProperty(target, key) {
         const res = Reflect.deleteProperty(target, key)
 
-        if (res) setItem(paths.length === 0 ? key : paths[0])
+        if (res) setItem(isRoot ? key : paths[0])
 
         return res
       },
+
+      ownKeys: isRoot ? ownKeys : undefined,
     })
 
     return proxyed
   }
 
-  const storage = toProxy(null, target, []) as T
+  const storage = toProxy(null, target, []) as T & {
+    readonly length: number
+    clear(): void
+  }
 
   return {
     storage,
