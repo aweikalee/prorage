@@ -62,3 +62,10 @@ export function createPluginPrimaryKey(name: string) {
     return `#p_${name}_`
   }
 }
+
+export function prefixWrap(key: string, prefix?: string) {
+  return prefix ? `${prefix}#${key}` : key
+}
+export function prefixUnwrap(key: string, prefix?: string) {
+  return prefix ? key.slice(prefix.length + 1) : key
+}

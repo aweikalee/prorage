@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createMemoryStorage } from './utils/memoryStorage'
-import { Replacer, createProrage, mergeReplacers } from '../lib'
+import { Replacer, createProrage, mergeReplacers, prefixWrap } from '../lib'
 
 const memoryStorage = createMemoryStorage()
 
@@ -76,5 +76,20 @@ describe('options - stringify, parse', () => {
     expect(memoryStorage.getItem('json')).toBe('{"##bigint":"123"}')
 
     expect(reader.json).toBe(123n)
+  })
+})
+
+describe('options - prefix', () => {
+  const { storage } = createProrage({
+    storage: memoryStorage,
+    prefix: 'test',
+  })
+
+  it('prefix', () => {
+    storage.prefix = 'test'
+    expect(memoryStorage.getItem('prefix')).not.toBe(JSON.stringify('test'))
+    expect(memoryStorage.getItem(prefixWrap('prefix', 'test'))).toBe(
+      JSON.stringify('test')
+    )
   })
 })

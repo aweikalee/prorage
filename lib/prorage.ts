@@ -9,7 +9,14 @@ import {
   StringifyLike,
   ParseLike,
 } from './types'
-import { isObject, isSymbol, mergeReplacers, objectType } from './utils'
+import {
+  isObject,
+  isSymbol,
+  mergeReplacers,
+  objectType,
+  prefixUnwrap,
+  prefixWrap,
+} from './utils'
 import * as symbols from './symbols'
 import { runHook, useParent, usePaths, useReceiver } from './hooks'
 
@@ -18,6 +25,8 @@ export type Options = {
   stringify?: StringifyLike
   parse?: ParseLike
   plugins?: ProragePlugin[]
+
+  prefix?: string
 }
 
 export function createProrage<T = any>(options: Options = {}) {
@@ -25,6 +34,8 @@ export function createProrage<T = any>(options: Options = {}) {
   const _storage = options.storage ?? localStorage
   const stringify = options.stringify ?? JSON.stringify
   const parse = options.parse ?? JSON.parse
+
+  const prefix = options.prefix
 
   const writers: Writer[] = []
   const readers: Reader[] = []
@@ -55,17 +66,20 @@ export function createProrage<T = any>(options: Options = {}) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
     const value = target[key as keyof T]
+    const _key = prefixWrap(key, prefix)
     if (value === undefined) {
       _storage.removeItem(key)
     } else {
-      _storage.setItem(key, stringify(value, writer))
+      _storage.setItem(_key, stringify(value, writer))
     }
   }
 
   function getItem(key: string | symbol) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
-    return parse(_storage.getItem(key as string) as string, reader)
+    const _key = prefixWrap(key, prefix)
+    const text = _storage.getItem(_key) as string
+    return parse(text, reader)
   }
 
   function toProxy(parent: any, target: any, paths: (string | symbol)[]): any {

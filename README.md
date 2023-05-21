@@ -32,6 +32,8 @@ const { storage } = createProrage({
   plugins: [
     createExpirePlugin(),
   ],
+
+  prefix: 'namespace',
 })
 ```
 | 参数 | 类型 | 默认值 | 说明 |
@@ -40,6 +42,7 @@ const { storage } = createProrage({
 | stringify | StringifyLike | `JSON.stringify` | 转换为 JSON 字符串的方法 |
 | parse | ParseLike | `JSON.parse` | 解析 JSON 字符串的方法 |
 | plugins | array\<ProragePlugin\> | `[]` | 扩展插件, 详细说明见后文 |
+| prefix | string | | 储存键名前缀, 可当做命名空间 |
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.
 
