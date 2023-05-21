@@ -27,6 +27,8 @@ storage.bar.push('hello')
 ```js
 const { storage } = createProrage({
   storage: localStorage,
+  stringify: JSON.stringify,
+  parse: JSON.parse,
   plugins: [
     createExpirePlugin(),
   ],
@@ -35,6 +37,8 @@ const { storage } = createProrage({
 | 参数 | 类型 | 默认值 | 说明 |
 | :-: | :-: | :-: | :-: |
 | storage | StorageLike | `localStorage` | 储存对象 |
+| stringify | StringifyLike | `JSON.stringify` | 转换为 JSON 字符串的方法 |
+| parse | ParseLike | `JSON.parse` | 解析 JSON 字符串的方法 |
 | plugins | array\<ProragePlugin\> | `[]` | 扩展插件, 详细说明见后文 |
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.

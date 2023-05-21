@@ -6,6 +6,8 @@ import {
   Reader,
   ProragePlugin,
   Replacer,
+  StringifyLike,
+  ParseLike,
 } from './types'
 import { isObject, isSymbol, mergeReplacers, objectType } from './utils'
 import * as symbols from './symbols'
@@ -13,12 +15,16 @@ import { runHook, useParent, usePaths, useReceiver } from './hooks'
 
 export type Options = {
   storage?: StorageLike
+  stringify?: StringifyLike
+  parse?: ParseLike
   plugins?: ProragePlugin[]
 }
 
 export function createProrage<T = any>(options: Options = {}) {
   const target = {} as T
   const _storage = options.storage ?? localStorage
+  const stringify = options.stringify ?? JSON.stringify
+  const parse = options.parse ?? JSON.parse
 
   const writers: Writer[] = []
   const readers: Reader[] = []
@@ -52,14 +58,14 @@ export function createProrage<T = any>(options: Options = {}) {
     if (value === undefined) {
       _storage.removeItem(key)
     } else {
-      _storage.setItem(key, JSON.stringify(value, writer))
+      _storage.setItem(key, stringify(value, writer))
     }
   }
 
   function getItem(key: string | symbol) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
-    return JSON.parse(_storage.getItem(key as string) as string, reader)
+    return parse(_storage.getItem(key as string) as string, reader)
   }
 
   function toProxy(parent: any, target: any, paths: (string | symbol)[]): any {

@@ -4,6 +4,9 @@ export type StorageLike = {
   removeItem: (key: string) => void
 }
 
+export type StringifyLike = (value: any, replacer?: Writer) => string
+export type ParseLike = (text: string, reviver?: Reader) => any
+
 export type Writer = (this: any, key: string, value: any) => any
 export type Reader = (this: any, key: string, value: any) => any
 export type Getter = (this: any, key: string | symbol, value: any) => any
