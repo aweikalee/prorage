@@ -14,6 +14,7 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'lib',
+      outputDir: 'types',
     }),
   ],
 })
