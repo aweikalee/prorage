@@ -42,9 +42,11 @@ const { storage } = createProrage({
 | stringify | StringifyLike | `JSON.stringify` | 转换为 JSON 字符串的方法 |
 | parse | ParseLike | `JSON.parse` | 解析 JSON 字符串的方法 |
 | plugins | array\<ProragePlugin\> | `[]` | 扩展插件, 详细说明见后文 |
+| target | object | `{}` | 被代理对象 |
 | prefix | string | | 储存键名前缀, 可当做命名空间 |
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.
+- `target` , 应传空的对象, 从 `storage` 中读取到的数据将会临时储存在 `target` 上. 暴露 `target` 主要是为了方便配合其他 `Proxy`.
 
 ---
 

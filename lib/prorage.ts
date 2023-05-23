@@ -26,11 +26,12 @@ export type Options = {
   parse?: ParseLike
   plugins?: ProragePlugin[]
 
+  target?: Record<string, any>
   prefix?: string
 }
 
-export function createProrage<T = any>(options: Options = {}) {
-  const target = {} as T
+export function createProrage<T = Record<string, any>>(options: Options = {}) {
+  const target = options.target ?? ({} as T)
   const _storage = options.storage ?? localStorage
   const stringify = options.stringify ?? JSON.stringify
   const parse = options.parse ?? JSON.parse
@@ -65,7 +66,7 @@ export function createProrage<T = any>(options: Options = {}) {
   function setItem(key: string | symbol) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
-    const value = target[key as keyof T]
+    const value = (target as any)[key]
     const _key = prefixWrap(prefix, key)
     if (value === undefined) {
       _storage.removeItem(key)

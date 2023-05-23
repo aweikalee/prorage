@@ -73,7 +73,7 @@ describe('key tests', () => {
 
   it('symbol', async () => {
     // set symbol as key in root node will throw error
-    const fn = async () => (storage[Symbol()] = 'symbol')
+    const fn = async () => (storage[Symbol() as unknown as string] = 'symbol')
     await expect(fn()).rejects.toBeTruthy()
 
     // else will be ignored

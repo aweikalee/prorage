@@ -54,7 +54,7 @@ describe('primitives tests', () => {
   })
 
   it('symbol as key', async () => {
-    const fn = async () => (storage[Symbol()] = 'symbol')
+    const fn = async () => (storage[Symbol() as unknown as string] = 'symbol')
     await expect(fn()).rejects.toBeTruthy()
   })
 })
