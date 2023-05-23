@@ -25,19 +25,23 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
   } = options
 
   const control = new ExpiresControl(immediate)
-  let _expires = 0
 
+  let _expires = 0
+  function useAbsoluteExpires(expires: number | Date, fn: Function) {
+    const oldExpires = _expires
+    try {
+      _expires = typeof expires === 'number' ? expires : expires.getTime()
+      fn()
+    } catch (error) {
+      throw error
+    } finally {
+      _expires = oldExpires
+    }
+  }
   return {
+    useAbsoluteExpires,
     useExpires(expires: number, fn: Function) {
-      const oldExpires = _expires
-      try {
-        _expires = expires
-        fn()
-      } catch (error) {
-        throw error
-      } finally {
-        _expires = oldExpires
-      }
+      useAbsoluteExpires(Math.floor(Date.now() + expires * multiplier), fn)
     },
 
     plugin: <ProragePlugin>{
@@ -63,19 +67,18 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
       },
       setter(key, value) {
         if (!_expires) return value
-        const expires = Math.floor(Date.now() + _expires * multiplier)
 
         const receiver = useReceiver()
         const target = {
           receiver,
           key,
-          expires,
+          expires: _expires,
           paths: receiver[symbols.PATHS],
         }
         control.insert(target)
 
         return {
-          [primaryKey]: expires,
+          [primaryKey]: _expires,
           value,
         }
       },

@@ -84,15 +84,21 @@ setTimeout(() => console.log(storage.test), 1001) // undefined
 - `immediate` 为 `true` 时, 会通过 `requestAnimationFrame` 不断检查过期数据, 删除时间可能存在误差. 只有**当前会话设置/被访问过*的过期数据才会加入到检查队列中.
 
 #### API
-##### useExpire
+##### useExpires
 ```ts
-function useExpire(fn: Function, expire: number): void
+function useExpires(expires: number, fn: Function): void
 ```
 
 - `fn`: `fn` 中被赋值的数据将被设置有效期.
 - `expires`: 有效期.
 
 ---
+
+##### useAbsoluteExpires
+```ts
+function useAbsoluteExpires(expires: number | Date, fn: Function): void
+```
+与 `useExpires` 作用一样，区别是 `useExpires` 的 `expires` 是相对时间，而 `useAbsoluteExpires` 的 `expires` 是绝对时间。
 
 ### objectsPlugin 对象类型支持扩展
 增加更多特殊对象的支持, 该插件内置了 `Date`, `RegExp` 的支持.

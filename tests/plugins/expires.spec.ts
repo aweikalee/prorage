@@ -21,7 +21,11 @@ describe('expires plugin', () => {
   })
 
   describe('basic', () => {
-    const { useExpires, plugin: expiresPlugin } = createExpiresPlugin()
+    const {
+      useExpires,
+      useAbsoluteExpires,
+      plugin: expiresPlugin,
+    } = createExpiresPlugin()
 
     const { storage } = createProrage({
       storage: memoryStorage,
@@ -39,9 +43,21 @@ describe('expires plugin', () => {
         value: 1,
       })
       expect(storage.test).toBe(1)
+
+      wait(_expires)
+      expect(memoryStorage.getItem('test')).not.toBe(null)
+      expect(storage.test).toBe(undefined)
+      expect(memoryStorage.getItem('test')).toBe(null)
     })
 
-    it('expired', async () => {
+    it('useAbsoluteExpires', () => {
+      useAbsoluteExpires(
+        new Date(Date.now() + _expires),
+        () => (storage.test = 1)
+      )
+
+      expect(storage.test).toBe(1)
+
       wait(_expires)
       expect(memoryStorage.getItem('test')).not.toBe(null)
       expect(storage.test).toBe(undefined)
@@ -67,9 +83,7 @@ describe('expires plugin', () => {
       useExpires(expires, () => (storage.test = 1))
       expect(primaryKey in toRaw(storage).test).toBe(true)
       expect(storage.test).toBe(1)
-    })
 
-    it('expired', async () => {
       wait(expires)
       expect(storage.test).toBe(undefined)
       expect(memoryStorage.getItem('test')).toBe(null)
