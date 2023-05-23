@@ -52,13 +52,14 @@ const { storage } = createProrage({
 
 ## 内置 Plugin
 ### expiresPlugin 有效期
-允许为数据设置有效期。有效期结束时，数据并不会立即被删除，而是在下一次被访问时删除。
+允许为数据设置有效期。
 
 ```js
 import { createProrage, createExpiresPlugin } from 'prorage'
 
 const { plugin: expiresPlugin, useExpires } = createExpiresPlugin({
   multiplier: 1,
+  immediate: true,
 })
 
 const { storage } = createProrage({
@@ -77,6 +78,10 @@ setTimeout(() => console.log(storage.test), 1001) // undefined
 | :-: | :-: | :-: | :-: |
 | primaryKey | string | `"#p_expires_"` | 有效期的键名, 含有该键名的对象将被认为是由该插件创建的对象 |
 | multiplier | number | `24*60*60*1000` | 有效期的倍数, 默认值即一天 |
+| immediate | boolean | `false` | 过期数据是否立即删除 |
+
+- 过期数据并**不会立即删除**, 而是**下次被访问时**才会被删除.
+- `immediate` 为 `true` 时, 会通过 `requestAnimationFrame` 不断检查过期数据, 删除时间可能存在误差. 只有**当前会话设置/被访问过*的过期数据才会加入到检查队列中.
 
 #### API
 ##### useExpire

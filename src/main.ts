@@ -7,6 +7,7 @@ import {
 
 const { plugin: expiresPlugin, useExpires } = createExpiresPlugin({
   multiplier: 1,
+  immediate: true,
 })
 
 const { storage } = createProrage({
