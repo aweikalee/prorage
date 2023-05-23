@@ -66,12 +66,12 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
   function setItem(key: string | symbol) {
     if (isSymbol(key)) throw new Error('Symbol key is not supported')
 
-    const value = (target as any)[key]
+    const value = stringify((target as any)[key], writer)
     const _key = prefixWrap(prefix, key)
     if (value === undefined) {
       _storage.removeItem(key)
     } else {
-      _storage.setItem(_key, stringify(value, writer))
+      _storage.setItem(_key, value)
     }
   }
 
