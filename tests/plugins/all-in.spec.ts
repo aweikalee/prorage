@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { createMemoryStorage } from '../utils/memoryStorage'
 import {
   createProrage,
   createExpiresPlugin,
@@ -8,8 +7,6 @@ import {
   Options,
 } from '../../lib'
 import { wait } from '../utils/wait'
-
-const memoryStorage = createMemoryStorage()
 
 const test = {
   bigint: () => 42n,
@@ -33,7 +30,6 @@ describe('plugins all in', () => {
     })
 
     const options: Options = {
-      storage: memoryStorage,
       plugins: [expiresPlugin, primitivesPlugin(), objectsPlugin()],
     }
 
@@ -70,7 +66,6 @@ describe('plugins all in', () => {
     })
 
     const options: Options = {
-      storage: memoryStorage,
       plugins: [objectsPlugin(), primitivesPlugin(), expiresPlugin],
     }
 

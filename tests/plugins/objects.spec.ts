@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createMemoryStorage } from '../utils/memoryStorage'
 import { createProrage, objectsPlugin, primaryKeys } from '../../lib'
-
-const memoryStorage = createMemoryStorage()
 
 const test = {
   date: () => new Date('2023-05-20T00:00:00.000Z'),
@@ -12,18 +9,16 @@ const test = {
 
 describe('basic', () => {
   const { storage: writer } = createProrage({
-    storage: memoryStorage,
     plugins: [objectsPlugin()],
   })
 
   const { storage: reader } = createProrage({
-    storage: memoryStorage,
     plugins: [objectsPlugin()],
   })
 
   it('Date', () => {
     writer.date = test.date()
-    expect(JSON.parse(memoryStorage.getItem('date')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('date')!)).toStrictEqual({
       [primaryKeys.objects]: 'Date',
       value: test.date().toISOString(),
     })
@@ -34,7 +29,7 @@ describe('basic', () => {
 
   it('RegExp', () => {
     writer.regexp = test.regexp()
-    expect(JSON.parse(memoryStorage.getItem('regexp')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('regexp')!)).toStrictEqual({
       [primaryKeys.objects]: 'RegExp',
       value: {
         source: test.regexp().source,
@@ -52,18 +47,18 @@ describe('options - primaryKey', () => {
   const plugin = objectsPlugin({ primaryKey })
 
   const { storage: writer } = createProrage({
-    storage: memoryStorage,
+    storage: localStorage,
     plugins: [plugin],
   })
 
   const { storage: reader } = createProrage({
-    storage: memoryStorage,
+    storage: localStorage,
     plugins: [plugin],
   })
 
   it('primaryKey', () => {
     writer.date = test.date()
-    expect(JSON.parse(memoryStorage.getItem('date')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('date')!)).toStrictEqual({
       [primaryKey]: 'Date',
       value: test.date().toISOString(),
     })
@@ -88,18 +83,18 @@ describe('options - adapter', () => {
   })
 
   const { storage: writer } = createProrage({
-    storage: memoryStorage,
+    storage: localStorage,
     plugins: [plugin],
   })
 
   const { storage: reader } = createProrage({
-    storage: memoryStorage,
+    storage: localStorage,
     plugins: [plugin],
   })
 
   it('add', () => {
     writer.add = test.fn()
-    expect(JSON.parse(memoryStorage.getItem('add')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('add')!)).toStrictEqual({
       [primaryKeys.objects]: 'Function',
       value: test.fn().toString(),
     })
@@ -110,7 +105,7 @@ describe('options - adapter', () => {
 
   it('replace', () => {
     writer.replace = test.date()
-    expect(JSON.parse(memoryStorage.getItem('replace')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('replace')!)).toStrictEqual({
       [primaryKeys.objects]: 'Date',
       value: test.date().getTime(),
     })
@@ -121,7 +116,7 @@ describe('options - adapter', () => {
 
   it('default', () => {
     writer.default = test.regexp()
-    expect(JSON.parse(memoryStorage.getItem('default')!)).toStrictEqual({
+    expect(JSON.parse(localStorage.getItem('default')!)).toStrictEqual({
       [primaryKeys.objects]: 'RegExp',
       value: {
         source: test.regexp().source,

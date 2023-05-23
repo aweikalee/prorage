@@ -8,20 +8,14 @@ import {
   prefixWrap,
 } from '../lib'
 
-const memoryStorage = createMemoryStorage()
-
 describe('basic', () => {
-  const options: Options = {
-    storage: memoryStorage,
-  }
-  const { storage: writer } = createProrage(options)
-
-  const { storage: reader } = createProrage(options)
+  const { storage: writer } = createProrage()
+  const { storage: reader } = createProrage()
 
   it('setItem', () => {
     writer.foo = 'bar'
 
-    expect(memoryStorage.getItem('foo')).toBe(JSON.stringify('bar'))
+    expect(localStorage.getItem('foo')).toBe(JSON.stringify('bar'))
   })
 
   it('getItem', () => {
@@ -30,10 +24,10 @@ describe('basic', () => {
 
   it('removeItem', () => {
     writer.foo = 'bar'
-    expect(memoryStorage.getItem('foo')).toBe(JSON.stringify('bar'))
+    expect(localStorage.getItem('foo')).toBe(JSON.stringify('bar'))
 
     delete writer.foo
-    expect(memoryStorage.getItem('foo')).toBe(null)
+    expect(localStorage.getItem('foo')).toBe(null)
   })
 
   it('clear', () => {
@@ -41,8 +35,8 @@ describe('basic', () => {
     writer.baz = 'qux'
     writer.clear()
 
-    expect(memoryStorage.getItem('foo')).toBe(null)
-    expect(memoryStorage.getItem('baz')).toBe(null)
+    expect(localStorage.getItem('foo')).toBe(null)
+    expect(localStorage.getItem('baz')).toBe(null)
   })
 
   it('keys', () => {
@@ -77,9 +71,26 @@ describe('basic', () => {
   })
 })
 
+describe('options - storage', () => {
+  const memoryStorage = createMemoryStorage()
+
+  const { storage: writer } = createProrage({
+    storage: memoryStorage,
+  })
+
+  const { storage: reader } = createProrage({
+    storage: memoryStorage,
+  })
+
+  it('storage', () => {
+    writer.foo = 'bar'
+    expect(memoryStorage.getItem('foo')).toBe(JSON.stringify('bar'))
+    expect(reader.foo).toBe('bar')
+  })
+})
+
 describe('options - stringify, parse', () => {
   const options: Options = {
-    storage: memoryStorage,
     stringify(value, replacer) {
       const replaces: Replacer[] = []
 
@@ -114,7 +125,7 @@ describe('options - stringify, parse', () => {
 
   it('stringify and parse', () => {
     writer.json = 123n
-    expect(memoryStorage.getItem('json')).toBe('{"##bigint":"123"}')
+    expect(localStorage.getItem('json')).toBe('{"##bigint":"123"}')
 
     expect(reader.json).toBe(123n)
   })
@@ -124,32 +135,29 @@ describe('options - target', () => {
   const target: any = {}
 
   const { storage } = createProrage({
-    storage: memoryStorage,
     target,
   })
 
   it('target', () => {
     storage.target = 'hello'
     expect(target.target).toBe('hello')
-    expect(memoryStorage.getItem('target')).toBe(JSON.stringify('hello'))
+    expect(localStorage.getItem('target')).toBe(JSON.stringify('hello'))
   })
 })
 
 describe('options - prefix', () => {
   const { storage: foo } = createProrage({
-    storage: memoryStorage,
     prefix: 'foo',
   })
 
   const { storage: bar } = createProrage({
-    storage: memoryStorage,
     prefix: 'bar',
   })
 
   it('prefix', () => {
     foo.prefix = 'test'
-    expect(memoryStorage.getItem('prefix')).not.toBe(JSON.stringify('test'))
-    expect(memoryStorage.getItem(prefixWrap('foo', 'prefix'))).toBe(
+    expect(localStorage.getItem('prefix')).not.toBe(JSON.stringify('test'))
+    expect(localStorage.getItem(prefixWrap('foo', 'prefix'))).toBe(
       JSON.stringify('test')
     )
   })

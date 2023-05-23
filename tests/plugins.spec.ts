@@ -1,13 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { createMemoryStorage } from './utils/memoryStorage'
 import { createProrage, toRaw } from '../lib'
-
-const memoryStorage = createMemoryStorage()
 
 describe('plugins tests', () => {
   it('writer and reader', () => {
     const { storage: writer } = createProrage({
-      storage: memoryStorage,
       plugins: [
         {
           writer(key, value) {
@@ -19,10 +15,9 @@ describe('plugins tests', () => {
 
     writer.test = { foo: 'baz' }
 
-    expect(memoryStorage.getItem('test')).toBe('{"foo":"bar"}')
+    expect(localStorage.getItem('test')).toBe('{"foo":"bar"}')
 
     const { storage: reader } = createProrage({
-      storage: memoryStorage,
       plugins: [
         {
           reader(key, value) {
@@ -37,7 +32,6 @@ describe('plugins tests', () => {
 
   it('setter and getter', () => {
     const { storage: setter } = createProrage({
-      storage: memoryStorage,
       plugins: [
         {
           setter(key, value) {
@@ -53,7 +47,6 @@ describe('plugins tests', () => {
     expect(setter.test).toStrictEqual({ foo: 'bar' })
 
     const { storage: getter } = createProrage({
-      storage: memoryStorage,
       plugins: [
         {
           getter(key, value) {
@@ -70,7 +63,6 @@ describe('plugins tests', () => {
   it('multiple plugins', () => {
     const order: string[] = []
     const { storage } = createProrage({
-      storage: memoryStorage,
       plugins: [
         {
           writer(_, value) {

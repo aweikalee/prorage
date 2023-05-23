@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { createMemoryStorage } from '../utils/memoryStorage'
 import {
   createProrage,
   createExpiresPlugin,
@@ -7,8 +6,6 @@ import {
   primaryKeys,
 } from '../../lib'
 import { wait } from '../utils/wait'
-
-const memoryStorage = createMemoryStorage()
 
 describe('expires plugin', () => {
   beforeEach(() => {
@@ -28,7 +25,6 @@ describe('expires plugin', () => {
     } = createExpiresPlugin()
 
     const { storage } = createProrage({
-      storage: memoryStorage,
       plugins: [expiresPlugin],
     })
 
@@ -38,16 +34,16 @@ describe('expires plugin', () => {
     it('useExpires', () => {
       useExpires(expires, () => (storage.test = 1))
 
-      expect(JSON.parse(memoryStorage.getItem('test')!)).toStrictEqual({
+      expect(JSON.parse(localStorage.getItem('test')!)).toStrictEqual({
         [primaryKeys.expires]: Date.now() + _expires,
         value: 1,
       })
       expect(storage.test).toBe(1)
 
       wait(_expires)
-      expect(memoryStorage.getItem('test')).not.toBe(null)
+      expect(localStorage.getItem('test')).not.toBe(null)
       expect(storage.test).toBe(undefined)
-      expect(memoryStorage.getItem('test')).toBe(null)
+      expect(localStorage.getItem('test')).toBe(null)
     })
 
     it('useAbsoluteExpires', () => {
@@ -59,9 +55,9 @@ describe('expires plugin', () => {
       expect(storage.test).toBe(1)
 
       wait(_expires)
-      expect(memoryStorage.getItem('test')).not.toBe(null)
+      expect(localStorage.getItem('test')).not.toBe(null)
       expect(storage.test).toBe(undefined)
-      expect(memoryStorage.getItem('test')).toBe(null)
+      expect(localStorage.getItem('test')).toBe(null)
     })
   })
 
@@ -73,7 +69,6 @@ describe('expires plugin', () => {
     })
 
     const { storage } = createProrage({
-      storage: memoryStorage,
       plugins: [expiresPlugin],
     })
 
@@ -86,7 +81,7 @@ describe('expires plugin', () => {
 
       wait(expires)
       expect(storage.test).toBe(undefined)
-      expect(memoryStorage.getItem('test')).toBe(null)
+      expect(localStorage.getItem('test')).toBe(null)
     })
   })
 
@@ -96,7 +91,6 @@ describe('expires plugin', () => {
     })
 
     const { storage } = createProrage({
-      storage: memoryStorage,
       plugins: [expiresPlugin],
     })
 
@@ -110,7 +104,7 @@ describe('expires plugin', () => {
     it('expired', async () => {
       wait(expires)
       expect(storage.test).toBe(undefined)
-      expect(memoryStorage.getItem('test')).toBe(null)
+      expect(localStorage.getItem('test')).toBe(null)
     })
   })
 
@@ -121,7 +115,6 @@ describe('expires plugin', () => {
     })
 
     const { storage } = createProrage({
-      storage: memoryStorage,
       plugins: [expiresPlugin],
     })
 
@@ -130,12 +123,12 @@ describe('expires plugin', () => {
     it('immediate', async () => {
       useExpires(expires, () => (storage.test = 1))
 
-      expect(memoryStorage.getItem('test')).not.toBeNull()
+      expect(localStorage.getItem('test')).not.toBeNull()
       expect(storage.test).toBe(1)
 
       wait(expires)
 
-      expect(memoryStorage.getItem('test')).toBeNull()
+      expect(localStorage.getItem('test')).toBeNull()
       expect(storage.test).toBeNull()
     })
   })
