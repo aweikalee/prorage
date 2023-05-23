@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { createMemoryStorage } from '../utils/memoryStorage'
 import {
   createProrage,
@@ -17,76 +17,87 @@ const test = {
   regexp: () => /test/gi,
 }
 
-describe('expires, primitives, objects', () => {
-  const { useExpires, plugin: expiresPlugin } = createExpiresPlugin({
-    multiplier: 1,
+describe('plugins all in', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2023, 5, 23))
   })
 
-  const options: Options = {
-    storage: memoryStorage,
-    plugins: [expiresPlugin, primitivesPlugin(), objectsPlugin()],
-  }
-
-  const { storage: writer } = createProrage(options)
-
-  const { storage: reader } = createProrage(options)
-
-  const target = {
-    bigint: test.bigint(),
-    expires: {
-      regexp: 1,
-      test: 1,
-    },
-    date: test.date(),
-  }
-
-  it('write and reader', async () => {
-    writer.test = target
-    useExpires(100, () => (writer.test.expires.regexp = test.regexp()))
-
-    expect(reader.test.bigint).toStrictEqual(test.bigint())
-    expect(reader.test.expires.regexp).toStrictEqual(test.regexp())
-    expect(reader.test.date).toStrictEqual(test.date())
-
-    await wait(101)
-    expect(reader.test.expires.regexp).toBeUndefined()
-    expect(reader.test.expires.test).toBe(1)
-  })
-})
-
-describe('expires, primitives, objects', () => {
-  const { useExpires, plugin: expiresPlugin } = createExpiresPlugin({
-    multiplier: 1,
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
-  const options: Options = {
-    storage: memoryStorage,
-    plugins: [objectsPlugin(), primitivesPlugin(), expiresPlugin],
-  }
+  describe('expires, primitives, objects', () => {
+    const { useExpires, plugin: expiresPlugin } = createExpiresPlugin({
+      multiplier: 1,
+    })
 
-  const { storage: writer } = createProrage(options)
+    const options: Options = {
+      storage: memoryStorage,
+      plugins: [expiresPlugin, primitivesPlugin(), objectsPlugin()],
+    }
 
-  const { storage: reader } = createProrage(options)
+    const { storage: writer } = createProrage(options)
 
-  const target = {
-    bigint: test.bigint(),
-    expires: {
-      regexp: 1,
-      test: 1,
-    },
-    date: test.date(),
-  }
+    const { storage: reader } = createProrage(options)
 
-  it('write and reader', async () => {
-    writer.test = target
-    useExpires(100, () => (writer.test.expires.regexp = test.regexp()))
+    const target = {
+      bigint: test.bigint(),
+      expires: {
+        regexp: 1,
+        test: 1,
+      },
+      date: test.date(),
+    }
 
-    expect(reader.test.bigint).toStrictEqual(test.bigint())
-    expect(reader.test.expires.regexp).toStrictEqual(test.regexp())
-    expect(reader.test.date).toStrictEqual(test.date())
+    it('write and reader', () => {
+      writer.test = target
+      useExpires(100, () => (writer.test.expires.regexp = test.regexp()))
 
-    await wait(101)
-    expect(reader.test.expires.regexp).toBeUndefined()
-    expect(reader.test.expires.test).toBe(1)
+      expect(reader.test.bigint).toStrictEqual(test.bigint())
+      expect(reader.test.expires.regexp).toStrictEqual(test.regexp())
+      expect(reader.test.date).toStrictEqual(test.date())
+
+      wait(100)
+      expect(reader.test.expires.regexp).toBeUndefined()
+      expect(reader.test.expires.test).toBe(1)
+    })
+  })
+
+  describe('expires, primitives, objects', () => {
+    const { useExpires, plugin: expiresPlugin } = createExpiresPlugin({
+      multiplier: 1,
+    })
+
+    const options: Options = {
+      storage: memoryStorage,
+      plugins: [objectsPlugin(), primitivesPlugin(), expiresPlugin],
+    }
+
+    const { storage: writer } = createProrage(options)
+
+    const { storage: reader } = createProrage(options)
+
+    const target = {
+      bigint: test.bigint(),
+      expires: {
+        regexp: 1,
+        test: 1,
+      },
+      date: test.date(),
+    }
+
+    it('write and reader', () => {
+      writer.test = target
+      useExpires(100, () => (writer.test.expires.regexp = test.regexp()))
+
+      expect(reader.test.bigint).toStrictEqual(test.bigint())
+      expect(reader.test.expires.regexp).toStrictEqual(test.regexp())
+      expect(reader.test.date).toStrictEqual(test.date())
+
+      wait(100)
+      expect(reader.test.expires.regexp).toBeUndefined()
+      expect(reader.test.expires.test).toBe(1)
+    })
   })
 })

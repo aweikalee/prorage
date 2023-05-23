@@ -1,3 +1,6 @@
+import { vi } from 'vitest'
+
 export function wait(time: number) {
-  return new Promise((resolve) => setTimeout(resolve, time))
+  setTimeout(() => {}, time)
+  vi.runAllTimers()
 }
