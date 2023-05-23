@@ -46,6 +46,7 @@ const { storage } = createProrage({
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.
 
+---
 
 ## 内置 Plugin
 ### expiresPlugin 有效期
@@ -83,6 +84,8 @@ function useExpire(fn: Function, expire: number): void
 
 - `fn`: `fn` 中被赋值的数据将被设置有效期.
 - `expires`: 有效期.
+
+---
 
 ### objectsPlugin 对象类型支持扩展
 增加更多特殊对象的支持, 该插件内置了 `Date`, `RegExp` 的支持.
@@ -126,6 +129,8 @@ console.log(rawType(() => {})) // 'Function'
 `adapter` 的键名可以调用 `rawType` 进行确认. 需提供 `writer`(写入), `reader`(读取) 两个函数对值进行转换.
 
 除了内置的 `Date`, `RegExp` 之外, 其他特殊对象不推荐支持.
+
+---
 
 ### primitivesPlugin 基础类型支持扩展
 主要提供了 `BigInt` 的支持.
@@ -171,6 +176,8 @@ console.log(typeOf(() => {})) // object
 `adapter` 的键名可以调用 `typeOf` 进行确认. 需提供 `writer`(写入), `reader`(读取) 两个函数对值进行转换.
 
 除了内置的 `bigint` 之外, 其他不符合 **JSON** 标准的类型不推荐支持.
+
+---
 
 ## Plugin 开发
 ```ts
@@ -232,11 +239,15 @@ export default <ProragePlugin>{
 ### 执行顺序
 根据 `plugins` 数组的顺序, `writer` 与 `setter` 按顺序执行, `reader` 与 `getter` 按逆序执行.
 
-## 数据类型支持情况
+---
+
+## 其他
+
+### 数据类型支持情况
 
 储存基于 `JSON.stringify` 与 `JSON.parse` 实现, 当前只支持标准 `JSON` 数据.
 
-### 基础类型
+#### 基础类型
 | 数据类型 | 基础支持 | with primitivesPlugin |
 | :-: | :-: | :-: |
 | undefined | ✔️ | ✔️ |
@@ -247,7 +258,7 @@ export default <ProragePlugin>{
 | BigInt | ❌ | ✔️ |
 | Symbol | ❌ | 可以勉强支持 |
 
-### 引用类型
+#### 引用类型
 | 数据类型 | 基础支持 | with objectsPlugin | 说明 |
 | :-: | :-: | :-: | :-: |
 | 基础的 Object | ✔️ | ✔️ | |
@@ -261,3 +272,34 @@ export default <ProragePlugin>{
 | WeakMap | ❌ | ❌ | 没有实现的价值 |
 
 使用 `symbol` 作为**键名**(Key)时, 通常将会被忽略. 若是作为根节点的键名, 则会在 `storage.setItem` 时抛出异常.
+
+---
+
+### With TypeScript
+```ts
+import { createProrage } from 'prorage'
+
+type MyStorage = {
+  foo: string
+  bar: number
+}
+const { storage } = createProrage<MyStorage>()
+```
+
+---
+
+### With Vue3
+```js
+import { reactive } from 'vue'
+import { createProrage } from 'prorage'
+
+
+const { storage } = createProrage()
+const reactiveStorage = reactive(storage)
+```
+
+```html
+<template>
+  <button @click="reactiveStorage.count">{{ reactiveStorage.count }}</button>
+</template>
+```
