@@ -23,25 +23,27 @@ export function primitivesPlugin(
     adapter?: PrimitivesAdapter
   } = {}
 ): ProragePlugin {
-  const primaryKey = options?.primaryKey ?? primaryKeys.primitives
-  const adapter = { ...defaultAdapter, ...options.adapter }
+  return () => {
+    const primaryKey = options?.primaryKey ?? primaryKeys.primitives
+    const adapter = { ...defaultAdapter, ...options.adapter }
 
-  return {
-    writer(_, value) {
-      const type = typeOf(value)
-      const writer = adapter[type]?.writer
-      if (!writer) return value
+    return {
+      writer(_, value) {
+        const type = typeOf(value)
+        const writer = adapter[type]?.writer
+        if (!writer) return value
 
-      return { [primaryKey]: type, value: writer(value) }
-    },
-    reader(_, value) {
-      if (!isObject(value)) return value
-      if (!(primaryKey in value)) return value
+        return { [primaryKey]: type, value: writer(value) }
+      },
+      reader(_, value) {
+        if (!isObject(value)) return value
+        if (!(primaryKey in value)) return value
 
-      const type = value[primaryKey]
-      const reader = adapter[type]?.reader
+        const type = value[primaryKey]
+        const reader = adapter[type]?.reader
 
-      return reader ? reader(value.value) : value.value
-    },
+        return reader ? reader(value.value) : value.value
+      },
+    }
   }
 }

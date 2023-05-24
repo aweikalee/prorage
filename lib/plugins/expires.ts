@@ -44,7 +44,7 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
       useAbsoluteExpires(Math.floor(Date.now() + expires * multiplier), fn)
     },
 
-    plugin: <ProragePlugin>{
+    plugin: <ProragePlugin>(() => ({
       getter(key, value) {
         if (typeOf(value) !== 'object') return value
         if (!(primaryKey in value)) return value
@@ -82,7 +82,7 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
           value,
         }
       },
-    },
+    })),
   }
 }
 

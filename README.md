@@ -194,7 +194,9 @@ console.log(typeOf(() => {})) // object
 
 ## Plugin 开发
 ```ts
-type ProragePlugin = {
+type ProragePlugin = () => ProragePluginOptions
+
+type ProragePluginOptions = {
   writer?: Writer
   reader?: Reader
   getter?: Getter

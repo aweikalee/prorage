@@ -28,15 +28,17 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
   const prefix = options.prefix
 
+  const toProxyPlugin: ProragePlugin = () => ({
+    getter(key, value) {
+      const paths = usePaths()
+      const receiver = useReceiver()
+      return toProxy(receiver, value, [...paths, key])
+    },
+  })
+
   const { writer, reader, setter, getter } = combinePlugins([
     ...(options.plugins ?? []),
-    {
-      getter(key, value) {
-        const paths = usePaths()
-        const receiver = useReceiver()
-        return toProxy(receiver, value, [...paths, key])
-      },
-    },
+    toProxyPlugin,
   ])
 
   const setterWalk = setterWalker(setter)

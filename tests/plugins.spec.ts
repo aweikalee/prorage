@@ -5,11 +5,11 @@ describe('plugins tests', () => {
   it('writer and reader', () => {
     const { storage: writer } = createProrage({
       plugins: [
-        {
+        () => ({
           writer(key, value) {
             return key === 'foo' ? 'bar' : value
           },
-        },
+        }),
       ],
     })
 
@@ -19,11 +19,11 @@ describe('plugins tests', () => {
 
     const { storage: reader } = createProrage({
       plugins: [
-        {
+        () => ({
           reader(key, value) {
             return key === 'foo' ? 'foo' : value
           },
-        },
+        }),
       ],
     })
 
@@ -33,11 +33,11 @@ describe('plugins tests', () => {
   it('setter and getter', () => {
     const { storage: setter } = createProrage({
       plugins: [
-        {
+        () => ({
           setter(key, value) {
             return key === 'foo' ? 'bar' : value
           },
-        },
+        }),
       ],
     })
 
@@ -48,11 +48,11 @@ describe('plugins tests', () => {
 
     const { storage: getter } = createProrage({
       plugins: [
-        {
+        () => ({
           getter(key, value) {
             return key === 'foo' ? 'foo' : value
           },
-        },
+        }),
       ],
     })
 
@@ -64,7 +64,7 @@ describe('plugins tests', () => {
     const order: string[] = []
     const { storage } = createProrage({
       plugins: [
-        {
+        () => ({
           writer(_, value) {
             order.push('one writer')
             return value
@@ -81,8 +81,8 @@ describe('plugins tests', () => {
             order.push('one setter')
             return value
           },
-        },
-        {
+        }),
+        () => ({
           writer(_, value) {
             order.push('two writer')
             return value
@@ -99,7 +99,7 @@ describe('plugins tests', () => {
             order.push('two setter')
             return value
           },
-        },
+        }),
       ],
     })
 

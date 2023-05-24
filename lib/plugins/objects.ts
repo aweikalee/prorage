@@ -31,33 +31,35 @@ export function objectsPlugin(
     adapter?: ObjectAdapter
   } = {}
 ): ProragePlugin {
-  const primaryKey = options?.primaryKey ?? primaryKeys.objects
-  const adapter = { ...defaultAdapter, ...options.adapter }
+  return () => {
+    const primaryKey = options?.primaryKey ?? primaryKeys.objects
+    const adapter = { ...defaultAdapter, ...options.adapter }
 
-  return {
-    writer(key, value) {
-      // JSON.stringify behavior:
-      // when object has toJSON method,
-      // value will be a string,
-      // this[key] will is original object
-      const originalValue = this[key]
+    return {
+      writer(key, value) {
+        // JSON.stringify behavior:
+        // when object has toJSON method,
+        // value will be a string,
+        // this[key] will is original object
+        const originalValue = this[key]
 
-      if (!isObject(originalValue)) return value
+        if (!isObject(originalValue)) return value
 
-      const type = rawType(originalValue)
-      const writer = adapter[type]?.writer
-      if (!writer) return value
+        const type = rawType(originalValue)
+        const writer = adapter[type]?.writer
+        if (!writer) return value
 
-      return { [primaryKey]: type, value: writer(originalValue) }
-    },
-    reader(_, value) {
-      if (!isObject(value)) return value
-      if (!(primaryKey in value)) return value
+        return { [primaryKey]: type, value: writer(originalValue) }
+      },
+      reader(_, value) {
+        if (!isObject(value)) return value
+        if (!(primaryKey in value)) return value
 
-      const type = value[primaryKey]
-      const reader = adapter[type]?.reader
+        const type = value[primaryKey]
+        const reader = adapter[type]?.reader
 
-      return reader ? reader(value.value) : value.value
-    },
+        return reader ? reader(value.value) : value.value
+      },
+    }
   }
 }
