@@ -7,8 +7,8 @@ import {
   prefixWrap,
 } from './utils'
 import * as symbols from './symbols'
-import { runHook, useParent, usePaths, useReceiver } from './hooks'
 import { combinePlugins, ProragePlugin } from './plugin'
+import { runContext, useContext } from './context'
 
 export type Options = {
   storage?: StorageLike
@@ -30,9 +30,8 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
   const toProxyPlugin: ProragePlugin = () => ({
     getter(key, value) {
-      const paths = usePaths()
-      const receiver = useReceiver()
-      return toProxy(receiver, value, [...paths, key])
+      const { paths } = useContext()
+      return toProxy(value, [...paths!, key])
     },
   })
 
@@ -67,14 +66,14 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
     return parse(text, reader)
   }
 
-  function toProxy(parent: any, target: any, paths: (string | symbol)[]): any {
+  function toProxy(target: any, paths: (string | symbol)[]): any {
     if (!isObject(target)) return target
 
     // skip Map, Set, WeakMap, WeakSet
     // skip Function, Date, RegExp, Error...
     if (objectType(target) !== 'common') return target
 
-    const isRoot = parent === null && paths.length === 0
+    const isRoot = paths.length === 0
 
     const privates = Object.assign(
       isRoot
@@ -96,7 +95,6 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
         : {},
       {
         [symbols.RAW]: target,
-        [symbols.PATHS]: paths,
       }
     )
 
@@ -127,7 +125,6 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
     const proxyed = new Proxy(target, {
       get(target, key, receiver) {
-        if (key === symbols.PARENT) return parent
         if (key in privates) return privates[key as keyof typeof privates]
 
         let value = Reflect.get(target, key, receiver)
@@ -138,23 +135,19 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
           value = getItem(key)
           Reflect.set(target, key, value, receiver)
         }
-
-        return runHook(() => getter.call(target, key, value), {
-          [symbols.RECEIVER]: receiver,
-          [symbols.PATHS]: paths,
-          [symbols.PARENT]: parent,
+        return runContext(() => {
+          const ctx = useContext()
+          ctx.paths = [...paths]
+          return getter.call(target, key, value)
         })
       },
 
       set(target, key, newValue, receiver) {
-        const res = runHook(
-          () => Reflect.set(target, key, setterWalk(key, newValue), receiver),
-          {
-            [symbols.RECEIVER]: receiver,
-            [symbols.PATHS]: paths,
-            [symbols.PARENT]: parent,
-          }
-        )
+        const res = runContext(() => {
+          const ctx = useContext()
+          ctx.paths = [...paths]
+          return Reflect.set(target, key, setterWalk(key, newValue), receiver)
+        })
 
         if (res) setItem(isRoot ? key : paths[0])
 
@@ -175,7 +168,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
     return proxyed
   }
 
-  const storage = toProxy(null, target, []) as T & {
+  const storage = toProxy(target, []) as T & {
     readonly length: number
     clear(): void
   }
@@ -188,49 +181,37 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
 function setterWalker(setter: Replacer): Replacer {
   return function (key: string | symbol, value: any) {
-    const paths = usePaths().slice()
     const temp = { [key]: value }
-    const parents = [useParent()]
-    const receiver = useReceiver()
     const setted = new Set()
-
-    const replaceTemp = (v: any) => (v === temp ? receiver : v)
 
     function walk(holder: any, key: string | symbol) {
       let value = holder[key]
       if (setted.has(value)) return value
       setted.add(value)
 
-      const res = runHook(
-        () => {
-          if (isObject(value)) {
-            parents.push(holder)
-            paths.push(key)
-            for (const k in value) {
-              if (Object.hasOwnProperty.call(value, k)) {
-                const v = walk(value, k)
+      const ctx = useContext()
+      const paths = [...ctx.paths!, key]
 
-                if (v !== undefined) {
-                  value[k] = v
-                } else {
-                  delete value[k]
-                }
+      return runContext(() => {
+        const ctx = useContext()
+        ctx.paths = paths
+
+        if (isObject(value)) {
+          for (const k in value) {
+            if (Object.hasOwnProperty.call(value, k)) {
+              const v = walk(value, k)
+
+              if (v !== undefined) {
+                value[k] = v
+              } else {
+                delete value[k]
               }
             }
-            paths.pop()
-            parents.pop()
           }
-
-          return setter.call(holder, key, value)
-        },
-        {
-          [symbols.PARENT]: replaceTemp(parents[parents.length - 1]),
-          [symbols.PATHS]: paths,
-          [symbols.RECEIVER]: holder === temp ? receiver : undefined,
         }
-      )
 
-      return res
+        return setter.call(holder, key, value)
+      })
     }
 
     return walk(temp, key)

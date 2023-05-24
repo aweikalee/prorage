@@ -1,8 +1,7 @@
-import { ProragePlugin } from '../plugin'
-import { typeOf } from '../utils'
-import { useReceiver } from '../hooks'
-import * as symbols from '../symbols'
+import { ProragePlugin, ProragePluginContext } from '../plugin'
+import { isObject } from '../utils'
 import * as primaryKeys from './primaryKeys'
+import { useContext } from '../context'
 
 export type ExpiresOptions = {
   primaryKey?: string
@@ -14,7 +13,6 @@ type ExpiresItem = {
   expires: number
   paths: (string | symbol)[]
   key: string | symbol
-  receiver: any
 }
 
 export function createExpiresPlugin(options: ExpiresOptions = {}) {
@@ -23,8 +21,6 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
     multiplier = 24 * 60 * 60 * 1000,
     immediate = false,
   } = options
-
-  const control = new ExpiresControl(immediate)
 
   let _expires = 0
   function useAbsoluteExpires(expires: number | Date, fn: Function) {
@@ -44,45 +40,46 @@ export function createExpiresPlugin(options: ExpiresOptions = {}) {
       useAbsoluteExpires(Math.floor(Date.now() + expires * multiplier), fn)
     },
 
-    plugin: <ProragePlugin>(() => ({
-      getter(key, value) {
-        if (typeOf(value) !== 'object') return value
-        if (!(primaryKey in value)) return value
-        const expires = value[primaryKey]
+    plugin: <ProragePlugin>((ctx) => {
+      const control = new ExpiresControl(ctx, immediate)
+      return {
+        getter(key, value) {
+          if (!isObject(value)) return value
+          if (!(primaryKey in value)) return value
+          const expires = value[primaryKey]
 
-        const receiver = useReceiver()
-        const target = {
-          receiver,
-          key,
-          expires,
-          paths: receiver[symbols.PATHS],
-        }
-        if (expires <= Date.now()) {
-          control.remove(target)
-          return
-        } else {
+          const { paths } = useContext()
+          const target = {
+            key,
+            expires,
+            paths: paths!,
+          }
+          if (expires <= Date.now()) {
+            control.remove(target)
+            return
+          } else {
+            control.insert(target)
+            return value.value
+          }
+        },
+        setter(key, value) {
+          if (!_expires) return value
+
+          const { paths } = useContext()
+          const target = {
+            key,
+            expires: _expires,
+            paths: paths!,
+          }
           control.insert(target)
-          return value.value
-        }
-      },
-      setter(key, value) {
-        if (!_expires) return value
 
-        const receiver = useReceiver()
-        const target = {
-          receiver,
-          key,
-          expires: _expires,
-          paths: receiver[symbols.PATHS],
-        }
-        control.insert(target)
-
-        return {
-          [primaryKey]: _expires,
-          value,
-        }
-      },
-    })),
+          return {
+            [primaryKey]: _expires,
+            value,
+          }
+        },
+      }
+    }),
   }
 }
 
@@ -142,7 +139,7 @@ class ExpiresHeap {
 class ExpiresControl extends ExpiresHeap {
   private timer: number | null = null
 
-  constructor(private immediate: boolean) {
+  constructor(private ctx: ProragePluginContext, private immediate: boolean) {
     super()
   }
 
@@ -157,14 +154,10 @@ class ExpiresControl extends ExpiresHeap {
   }
 
   remove(item: ExpiresItem) {
-    const { receiver, key, paths } = item
+    const { key, paths } = item
+    let target = this.ctx.receiver
 
     super.remove(item)
-
-    let target = receiver
-    while (target[symbols.PARENT]) {
-      target = target[symbols.PARENT]
-    }
 
     for (let path of paths) {
       if (path in target) {

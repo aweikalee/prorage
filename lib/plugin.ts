@@ -10,7 +10,7 @@ export type ProragePluginOptions = {
   setter?: Setter
 }
 
-export type ProragePluginContext = {
+export interface ProragePluginContext {
   target: any
   receiver: any
 }

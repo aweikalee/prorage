@@ -196,6 +196,11 @@ console.log(typeOf(() => {})) // object
 ```ts
 type ProragePlugin = (ctx: ProragePluginContext) => ProragePluginOptions
 
+interface ProragePluginContext {
+  target: any
+  receiver: any
+}
+
 type ProragePluginOptions = {
   writer?: Writer
   reader?: Reader
@@ -210,6 +215,8 @@ type Setter = (this: any, key: string | symbol, value: any) => any
 ```
 
 `prorage` 的参数 `plugins` 应传入 `ProragePlugin` 类型的数据. 具体可以参考内置的 `ProragePlugin`.
+
+- `ProragePluginContext` 中 `receiver` 在创建阶段无法访问, `writer/reader/setter/getter` 中可以访问.
 
 ### 基础结构
 `prorage` 将数据分为三种:
@@ -227,29 +234,32 @@ type Setter = (this: any, key: string | symbol, value: any) => any
 > `JSON.stringify` 的行为: 当对象中存在 `toJSON` 方法时, `replacer` 中访问的值将是 `toJSON` 返回值. 可以在 `replacer` 中通过 `this[key]` 获取到对象的原始值.
 
 ### getter/setter
-`setter/getter` 则设计成与 `writer/reader` 相似, 但不同的是 `setter/getter` 中提供了一套 Hook 函数.
+`setter/getter` 则设计成与 `writer/reader` 相似, 但不同的是 `setter/getter` 中提供允许使用 `useContext`.
 
-#### Hook 函数
+#### useContext
 ```ts
-import { usePaths, ProragePlugin } from 'prorage'
+import { useContext, ProragePlugin } from 'prorage'
 
-export default <ProragePlugin>{
-  getter(key, value) {
-    const paths = usePaths()
-    /* ... */
-    return value
+export default <ProragePlugin>function () {
+  return {
+    getter(key, value) {
+      const ctx = useContext()
+      const paths = ctx.paths
+      /* ... */
+      return value
+    }
   }
 }
 ```
 
-| 方法名 | 返回类型 | 说明 |
-| :-: | :-: | :-: |
-| useReceiver | any | 当前节点的代理对象 |
-| usePaths | string[] | 当前节点完整的父路径 |
-| useParent | any | 当前节点的父节点 |
+```ts
+interface ProrageContext {
+  paths: (string | symbol)[]
+}
 
-- Hook 函数应在 `getter/setter` 中使用.
-- `setter` 中 `useReceiver` 仅赋值操作的节点可以获取到对应的代理对象, 其他节点均为 `undefined`.
+function useContext(): ProrageContext
+```
+- `useContext` 应在 `getter/setter` 中使用.
 
 ### 执行顺序
 根据 `plugins` 数组的顺序, `writer` 与 `setter` 按顺序执行, `reader` 与 `getter` 按逆序执行.

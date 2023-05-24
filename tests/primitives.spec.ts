@@ -45,7 +45,6 @@ describe('primitives tests', () => {
 
   it('symbol', () => {
     storage.symbol = Symbol() // will be undefined
-    console.log('wtf?', localStorage.getItem('symbol'))
     expect(localStorage.getItem('symbol')).toBe(null)
   })
 

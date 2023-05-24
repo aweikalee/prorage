@@ -1,5 +1,5 @@
 export * from './prorage'
-export * from './hooks'
+export * from './plugin'
 export * from './types'
 export * from './utils'
 export * as flags from './symbols'
