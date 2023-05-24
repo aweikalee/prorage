@@ -36,7 +36,11 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
     },
   })
 
-  const { writer, reader, setter, getter } = combinePlugins([
+  const ctx = {
+    target,
+    receiver: null as any,
+  }
+  const { writer, reader, setter, getter } = combinePlugins(ctx, [
     ...(options.plugins ?? []),
     toProxyPlugin,
   ])
@@ -175,6 +179,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
     readonly length: number
     clear(): void
   }
+  ctx.receiver = storage
 
   return {
     storage,

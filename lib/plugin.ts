@@ -1,7 +1,7 @@
 import { Writer, Reader, Getter, Setter } from './types'
 import { mergeReplacers } from './utils'
 
-export type ProragePlugin = () => ProragePluginOptions
+export type ProragePlugin = (ctx: ProragePluginContext) => ProragePluginOptions
 
 export type ProragePluginOptions = {
   writer?: Writer
@@ -10,14 +10,22 @@ export type ProragePluginOptions = {
   setter?: Setter
 }
 
-export function combinePlugins(plugins: ProragePlugin[]) {
+export type ProragePluginContext = {
+  target: any
+  receiver: any
+}
+
+export function combinePlugins(
+  ctx: ProragePluginContext,
+  plugins: ProragePlugin[]
+) {
   const writers: Writer[] = []
   const readers: Reader[] = []
   const setters: Setter[] = []
   const getters: Getter[] = []
 
   plugins.forEach((plugin) => {
-    const { writer, reader, setter, getter } = plugin()
+    const { writer, reader, setter, getter } = plugin(ctx)
     if (writer) writers.push(writer)
     if (reader) readers.unshift(reader)
     if (setter) setters.push(setter)
