@@ -207,11 +207,14 @@ function setterWalker(setter: Replacer): Replacer {
     const temp = { [key]: value }
     const parents = [useParent()]
     const receiver = useReceiver()
+    const setted = new Set()
 
     const replaceTemp = (v: any) => (v === temp ? receiver : v)
 
     function walk(holder: any, key: string | symbol) {
       let value = holder[key]
+      if (setted.has(value)) return value
+      setted.add(value)
 
       const res = runHook(
         () => {
