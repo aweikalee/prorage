@@ -1,24 +1,14 @@
-import {
-  StorageLike,
-  Getter,
-  Setter,
-  Writer,
-  Reader,
-  ProragePlugin,
-  Replacer,
-  StringifyLike,
-  ParseLike,
-} from './types'
+import { StorageLike, Replacer, StringifyLike, ParseLike } from './types'
 import {
   isObject,
   isSymbol,
-  mergeReplacers,
   objectType,
   prefixUnwrap,
   prefixWrap,
 } from './utils'
 import * as symbols from './symbols'
 import { runHook, useParent, usePaths, useReceiver } from './hooks'
+import { combinePlugins, ProragePlugin } from './plugin'
 
 export type Options = {
   storage?: StorageLike
@@ -38,28 +28,16 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
   const prefix = options.prefix
 
-  const writers: Writer[] = []
-  const readers: Reader[] = []
-  const setters: Setter[] = []
-  const getters: Getter[] = []
-
-  options.plugins?.forEach(({ writer, reader, setter, getter }) => {
-    if (writer) writers.push(writer)
-    if (reader) readers.unshift(reader)
-    if (setter) setters.push(setter)
-    if (getter) getters.unshift(getter)
-  })
-
-  getters.push(function (key, value) {
-    const paths = usePaths()
-    const receiver = useReceiver()
-    return toProxy(receiver, value, [...paths, key])
-  })
-
-  const writer = mergeReplacers(writers)
-  const reader = mergeReplacers(readers)
-  const setter = mergeReplacers(setters)
-  const getter = mergeReplacers(getters)
+  const { writer, reader, setter, getter } = combinePlugins([
+    ...(options.plugins ?? []),
+    {
+      getter(key, value) {
+        const paths = usePaths()
+        const receiver = useReceiver()
+        return toProxy(receiver, value, [...paths, key])
+      },
+    },
+  ])
 
   const setterWalk = setterWalker(setter)
 

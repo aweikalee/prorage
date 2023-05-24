@@ -1,4 +1,4 @@
-import { ProragePlugin } from '../types'
+import { ProragePlugin } from '../plugin'
 import { isObject, typeOf } from '../utils'
 import * as primaryKeys from './primaryKeys'
 

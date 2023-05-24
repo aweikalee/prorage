@@ -1,4 +1,4 @@
-import { ProragePlugin } from '../types'
+import { ProragePlugin } from '../plugin'
 import { typeOf } from '../utils'
 import { useReceiver } from '../hooks'
 import * as symbols from '../symbols'
