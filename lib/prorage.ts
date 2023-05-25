@@ -5,6 +5,7 @@ import {
   objectType,
   prefixUnwrap,
   prefixWrap,
+  toRaw,
 } from './utils'
 import * as symbols from './symbols'
 import { combinePlugins, ProragePlugin } from './plugin'
@@ -28,7 +29,10 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
 
   const prefix = options.prefix
 
-  const toProxyPlugin: ProragePlugin = () => ({
+  const proxyPlugin: ProragePlugin = () => ({
+    setter(_, value) {
+      return toRaw(value)
+    },
     getter(key, value) {
       const { paths } = useContext()
       return toProxy(value, [...paths!, key])
@@ -41,7 +45,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
   }
   const { writer, reader, setter, getter } = combinePlugins(ctx, [
     ...(options.plugins ?? []),
-    toProxyPlugin,
+    proxyPlugin,
   ])
 
   const setterWalk = setterWalker(setter)
