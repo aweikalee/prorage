@@ -69,6 +69,14 @@ describe('basic', () => {
     expect(writer.length).toBe(1)
     expect(reader.length).toBe(1)
   })
+
+  it('revoke', async () => {
+    writer.revoke = {}
+    const revoke = writer.revoke
+    delete writer.revoke
+    const fn = async () => (revoke.foo = 'bar')
+    await expect(fn()).rejects.toBeTruthy()
+  })
 })
 
 describe('options - storage', () => {

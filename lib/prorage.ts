@@ -71,6 +71,19 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
     return parse(text, reader)
   }
 
+  function isRevoked(paths: (string | symbol)[]) {
+    if (paths.length === 0) return false
+
+    let target = ctx.target
+    for (let i = 0; i < paths.length; i++) {
+      const path = paths[i]
+      target = (target as any)[path]
+      if (target === undefined) return true
+    }
+
+    return false
+  }
+
   function toProxy(target: any, paths: (string | symbol)[]): any {
     if (!isObject(target)) return target
 
@@ -128,7 +141,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
       return keys
     }
 
-    const proxyed = new Proxy(target, {
+    const { proxy, revoke } = Proxy.revocable(target, {
       get(target, key, receiver) {
         if (key in privates) return privates[key as keyof typeof privates]
 
@@ -148,6 +161,11 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
       },
 
       set(target, key, newValue, receiver) {
+        if (isRevoked(paths)) {
+          revoke()
+          throw new Error(`[prorage] Proxy has been revoked. paths: ${paths}`)
+        }
+
         const res = runContext(() => {
           const ctx = useContext()
           ctx.paths = [...paths]
@@ -160,6 +178,11 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
       },
 
       deleteProperty(target, key) {
+        if (isRevoked(paths)) {
+          revoke()
+          throw new Error(`[prorage] Proxy has been revoked. paths: ${paths}`)
+        }
+
         const res = Reflect.deleteProperty(target, key)
 
         if (res) setItem(isRoot ? key : paths[0])
@@ -170,7 +193,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
       ownKeys: isRoot ? ownKeys : undefined,
     })
 
-    return proxyed
+    return proxy
   }
 
   const storage = toProxy(target, []) as T & {
