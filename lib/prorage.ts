@@ -42,6 +42,7 @@ export function createProrage<T = Record<string, any>>(options: Options = {}) {
   const ctx = {
     target,
     receiver: null as any,
+    setItem,
   }
   const { writer, reader, setter, getter } = combinePlugins(ctx, [
     ...(options.plugins ?? []),

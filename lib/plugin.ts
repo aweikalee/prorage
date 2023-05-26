@@ -13,6 +13,7 @@ export type ProragePluginOptions = {
 export interface ProragePluginContext {
   target: any
   receiver: any
+  setItem(key: string | symbol): void
 }
 
 export function combinePlugins(

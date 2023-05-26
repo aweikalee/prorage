@@ -155,7 +155,7 @@ class ExpiresControl extends ExpiresHeap {
 
   remove(item: ExpiresItem) {
     const { key, paths } = item
-    let target = this.ctx.receiver
+    let target = this.ctx.target
 
     super.remove(item)
 
@@ -169,6 +169,7 @@ class ExpiresControl extends ExpiresHeap {
 
     if (target) {
       delete target[key]
+      this.ctx.setItem(paths.length === 0 ? key : paths[0])
     }
   }
 
