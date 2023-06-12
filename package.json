@@ -1,0 +1,61 @@
+{
+  "name": "prorage",
+  "version": "1.0.0",
+  "description": "Storage used like object, Based on ES6 API Proxy and @vue/reactivity.",
+  "type": "module",
+  "main": "./dist/prorage.umd.js",
+  "module": "./dist/prorage.js",
+  "browser": "./dist/prorage.umd.cjs",
+  "exports": {
+    ".": {
+      "import": "./dist/prorage.js",
+      "require": "./dist/prorage.umd.cjs",
+      "types": "./types/index.d.ts"
+    }
+  },
+  "types": "./types/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "cd playground && npm run dev",
+    "build": "tsc && vite build",
+    "build:playground": "cd playground && npm run build",
+    "test": "vitest run",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install"
+  },
+  "peerDependencies": {
+    "@vue/reactivity": "^3.3.4"
+  },
+  "dependencies": {
+    "@vue/shared": "^3.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.1.3",
+    "husky": "^8.0.3",
+    "jsdom": "^22.0.0",
+    "lint-staged": "^13.2.2",
+    "prettier": "^2.8.8",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0",
+    "vite-plugin-dts": "^2.3.0",
+    "vitest": "^0.31.1"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "prettier --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aweikalee/prorage.git"
+  },
+  "homepage": "https://github.com/aweikalee/prorage",
+  "author": "aweikalee",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "lib",
+    "types",
+    "README.md"
+  ]
+}
