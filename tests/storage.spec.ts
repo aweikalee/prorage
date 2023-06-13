@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createStorage, toProrageRaw } from '../lib'
+import { createStorage, prefixWrap, toProrageRaw } from '../lib'
 import { nextTick } from './utils/wait'
 import { createMemoryStorage } from './utils/memoryStorage'
 import { toRaw } from '@vue/reactivity'
@@ -84,6 +84,37 @@ describe('storage', () => {
 
       delete storage.foo
       expect(sessionStorage.getItem('foo')).toBe(null)
+    })
+
+    describe('prefix: test#', () => {
+      const prefix = 'test#'
+      let storage: any
+      beforeEach(() => {
+        storage = createStorage({
+          saveFlush: 'sync',
+          prefix,
+        })
+      })
+
+      it('write', () => {
+        storage.foo = 'bar'
+        expect(localStorage.getItem(prefixWrap(prefix, 'foo'))).toBe(
+          JSON.stringify('bar')
+        )
+      })
+
+      it('read', () => {
+        expect(storage.foo).toBe('bar')
+      })
+
+      it('keys', () => {
+        expect(Object.keys(storage)).toEqual(['foo'])
+      })
+
+      it('delete', () => {
+        delete storage.foo
+        expect(localStorage.getItem(prefixWrap(prefix, 'foo'))).toBe(null)
+      })
     })
   })
 

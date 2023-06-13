@@ -18,3 +18,10 @@ export function toProrageRaw<T>(observed: T): T {
   const raw = observed && (observed as any)[Flags.RAW]
   return raw ? toProrageRaw(raw) : observed
 }
+
+export function prefixWrap(prefix: string | undefined, key: string) {
+  return prefix ? `${prefix}${key}` : key
+}
+export function prefixUnwrap(prefix: string | undefined, key: string) {
+  return prefix ? key.slice(prefix.length) : key
+}

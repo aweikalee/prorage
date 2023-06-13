@@ -4,12 +4,13 @@ import { createHooks, type ProragePlugin } from './hook'
 import { invalidateJob, queueJob, watch } from './watch'
 import { type StorageLike } from './types'
 import { extraPlugin } from './plugins/extra'
-import { Flags } from './shared'
+import { Flags, prefixWrap } from './shared'
 
 export interface NamespaceOptions {
   storage?: StorageLike
   plugins?: ProragePlugin[]
   saveFlush?: 'sync' | 'async'
+  prefix?: string
 }
 
 export function createNamespace<T = any>(
@@ -18,6 +19,7 @@ export function createNamespace<T = any>(
 ) {
   const storage = options.storage ?? localStorage
   const saveFlush = options.saveFlush ?? 'async'
+  const keyWithPrefix = prefixWrap(options.prefix, key)
 
   const plugins = [...(options.plugins ?? []), extraPlugin]
   const hooks = createHooks(plugins)
@@ -34,7 +36,7 @@ export function createNamespace<T = any>(
   let isReloading = false
   function reload() {
     invalidateJob(save)
-    const text = storage.getItem(key)
+    const text = storage.getItem(keyWithPrefix)
 
     hooks.beforeParse()
 
@@ -58,9 +60,9 @@ export function createNamespace<T = any>(
     hooks.afterStringify()
 
     if (text === undefined) {
-      storage.removeItem(key)
+      storage.removeItem(keyWithPrefix)
     } else {
-      storage.setItem(key, text)
+      storage.setItem(keyWithPrefix, text)
     }
   }
   function clear() {

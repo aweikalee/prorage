@@ -48,6 +48,7 @@ const storage = createStorage({
 | storage | StorageLike | `localStorage` | 储存对象 |
 | saveFlush | `sync` \| `async` | `async` | 保存的执行时机 |
 | plugins | ProragePlugin[] | `[]` | 插件 |
+| prefix | string |  | 储存键名前缀 |
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.
 - `saveFlush` 为 `async` 时，多次操作会合并为一次保存，而 `sync` 时则会在每次操作后立即保存。

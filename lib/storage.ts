@@ -3,7 +3,7 @@ import { isString } from '@vue/shared'
 import { createNamespace, type NamespaceOptions } from './namespace'
 import { ReactiveFlags } from './vue-mock'
 import { ProragePlugin } from './hook'
-import { Flags, isNamespace } from './shared'
+import { Flags, isNamespace, prefixUnwrap, prefixWrap } from './shared'
 
 export interface StorageOptions extends NamespaceOptions {}
 
@@ -11,6 +11,7 @@ export function createStorage<T extends object = any>(
   options: StorageOptions = {}
 ) {
   const storage = options.storage ?? localStorage
+  const prefix = options.prefix
 
   const baseStorage = {}
   const reactiveStorage = reactive(baseStorage)
@@ -18,7 +19,7 @@ export function createStorage<T extends object = any>(
   function maybeNamespace(key: string) {
     if (baseStorage.hasOwnProperty(key)) return true
 
-    const value = storage.getItem(key)
+    const value = storage.getItem(prefixWrap(prefix, key))
     if (value !== null && value !== undefined) {
       return true
     }
@@ -91,7 +92,7 @@ export function createStorage<T extends object = any>(
         if (isNamespace(namespace)) {
           namespace.clear()
         } else {
-          storage.removeItem(key)
+          storage.removeItem(prefixWrap(prefix, key))
         }
       }
 
@@ -99,7 +100,14 @@ export function createStorage<T extends object = any>(
     },
 
     ownKeys(reactiveStorage) {
-      const keys = Reflect.ownKeys(storage)
+      let keys = Object.keys(storage)
+
+      if (prefix) {
+        const _prefix = prefixWrap(prefix, '')
+        keys = keys
+          .filter((key) => String(key).startsWith(_prefix))
+          .map((key) => prefixUnwrap(prefix, key))
+      }
 
       // `Object.keys`, return value contains only the enumerable keys.
       // make it become the enumerable key, by setting the key.

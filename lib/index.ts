@@ -16,7 +16,13 @@ export {
   type DeleteProperty,
 } from './hook'
 
-export { isNamespace, isStorage, toProrageRaw } from './shared'
+export {
+  isNamespace,
+  isStorage,
+  toProrageRaw,
+  prefixWrap,
+  prefixUnwrap,
+} from './shared'
 
 export { watch, watchEffect } from './watch'
 
