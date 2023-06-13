@@ -3,6 +3,8 @@
 
 `Prorage` = `Proxy` + `Storage`
 
+**[playground]**: [Stackblitz](https://stackblitz.com/edit/prorage-playground?file=src%2Fstorage.ts)
+
 ## 安装
 ```sh
 npm install @vue/reactivity
