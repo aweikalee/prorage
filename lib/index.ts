@@ -35,3 +35,9 @@ export {
   type ExpiresDateOptions,
   type ExpiresDate,
 } from './plugins/expires'
+
+export {
+  translatePlugin,
+  type TranslatePluginOptions,
+  type TranslateDictionary,
+} from './plugins/translate'

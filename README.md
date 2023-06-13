@@ -25,6 +25,8 @@ storage.bar = []
 storage.bar.push('hello')
 ```
 
+---
+
 ## Storage 实例
 ### Options
 ```js
@@ -75,8 +77,10 @@ temp === storage.test // false
 storage.save('foo')
 ```
 
+---
+
 ## 内置 Plugin
-### extraPlugin
+### extraPlugin 附加属性
 为数据增加附加属性. 作为一个基础 **Plugin**, 不需要声明使用.
 
 ```js
@@ -115,6 +119,8 @@ function deleteActiveExtra(key: string): void
 ```ts
 function getActiveExtra(key: string): unkonwn
 ```
+
+---
 
 ### expiresPlugin 有效期
 允许为数据设置有效期.
@@ -162,7 +168,104 @@ type ExpiresDateOptions = {
 - `expires` 为 `Date`, 作为过期的绝对时间.
 - `expires` 为 `ExpiresDateOptions`, 作为过期的相对时间(相对当前时间).
 
+---
+
+### translatePlugin 数据转换
+将数据转换为更适合储存的格式.
+
+```js
+import { createStorage, translatePlugin } from 'prorage'
+const storage = createStorage({
+  plugins: [translatePlugin()]
+})
+
+storage.foo = new Date()
+storage.bar = 123n
+storage.baz = /test/gi
+storage.qux = Infinity
+```
+
+默认支持的数据类型有: `BigInt`, `NaN/Infinity/-Infinity`, `Date`, `RegExp`.
+
+#### Options
+| 参数 | 类型 | 默认值 | 说明 |
+| :-: | :-: | :-: | :-: |
+| dictionary | TranslateDictionary[] | `[]` | 字典 |
+
+##### dictionary
+```js
+import { createStorage, translatePlugin } from 'prorage'
+const storage = createStorage({
+  plugins: [
+    translatePlugin({
+      dictionary: [
+        {
+          name: 'Symbol',
+          test: (value) => typeof value === 'symbol',
+          stringify: (value) => value.toString(),
+          parse: (value) => {
+            const _Symbol = (value) => {
+              try {
+                return new Function(`return ${value}`)()
+              } catch (e) {
+                return typeof value === 'symbol'
+                  ? value
+                  : Symbol.for(String(value))
+              }
+            }
+            const _value = value.replace(/^Symbol\((.*)\)$/, '_Symbol("$1")')
+            return new Function('_Symbol', `return ${_value}`)(_Symbol)
+          },
+        }
+      ]
+    })
+  ]
+})
+
+storage.foo = Symbol.for('123')
+```
+
+| 参数 | 类型 | 说明 |
+| :-: | :-: | :-: |
+| name | string | 唯一标识 |
+| test | (value: unknown) => boolean | 判断数据是否由该字典进行处理 |
+| stringify | (value: any) => any | 转换为储存格式 |
+| parse | (value: any) => any | 还原数据 |
+
+- `name` 需要唯一, 内置的标识有: `BigInt`, `Number`, `Date`, `RegExp`.
+- 按数组顺序进行 `test` (内置的追加在数组末尾), 匹配后该数据将不再进行其他转换操作.
+
 ## 其他
+
+### 数据类型支持情况
+键名支持和对象一样, 但 `symbol` 作为键名 `JSON.stringify` 时会被忽略.
+
+键值支持情况如下.
+
+#### 基础类型
+| 数据类型 | 基础支持 | with translatePlugin |
+| :-: | :-: | :-: |
+| undefined | ✔️ | ✔️ |
+| null | ✔️ | ✔️ |
+| String | ✔️ | ✔️ |
+| Boolean | ✔️ | ✔️ |
+| Number | ✔️ | ✔️ |
+| BigInt | ❌ | ✔️ |
+| Symbol | ❌ | 可以支持 `Symbol.for` (需用户配置) |
+
+#### 引用类型
+| 数据类型 | 基础支持 | with translatePlugin | 说明 |
+| :-: | :-: | :-: | :-: |
+| 基础的 Object | ✔️ | ✔️ | |
+| Array | ✔️ | ✔️ | |
+| Date | ❌ | ✔️ | |
+| RegExp | ❌ | ✔️ | |
+| Function | ❌ | 可以勉强支持 (需用户配置) | 会丢失作用域 |
+| Set | ❌ | ❌ | 实现成本与收益不匹配 |
+| Map | ❌ | ❌ | 实现成本与收益不匹配 |
+| WeakSet | ❌ | ❌ | 没有实现价值 |
+| WeakMap | ❌ | ❌ | 没有实现价值 |
+
 ### Plugin 的开发
 [Plugin 的开发](./docs/plugin.md)
 
