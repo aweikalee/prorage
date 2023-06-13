@@ -82,9 +82,14 @@ export function createStorage<T extends object = any>(
     deleteProperty(reactiveStorage, key) {
       if (isString(key) && maybeNamespace(key)) {
         const baseStorage = toRaw(reactiveStorage)
-        const namespace = Reflect.get(baseStorage, key)
+        let namespace = Reflect.get(baseStorage, key)
+        if (!namespace) {
+          namespace = _createNamespace(key)
+          Reflect.set(reactiveStorage, key, namespace)
+        }
+
         if (isNamespace(namespace)) {
-          namespace.value = undefined
+          namespace.clear()
         } else {
           storage.removeItem(key)
         }

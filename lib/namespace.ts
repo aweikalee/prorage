@@ -63,6 +63,9 @@ export function createNamespace<T = any>(
       storage.setItem(key, text)
     }
   }
+  function clear() {
+    delete state.value
+  }
 
   watch(
     () => reactiveState.value,
@@ -109,6 +112,7 @@ export function createNamespace<T = any>(
   const prototype = {
     reload,
     save,
+    clear,
   }
   Object.setPrototypeOf(prototype, Object.getPrototypeOf(namespace))
   Object.setPrototypeOf(namespace, prototype)

@@ -35,7 +35,7 @@ export type Setter = Interceptor
 export type DeleteProperty = (
   target: object,
   key: string | symbol
-) => boolean | undefined
+) => boolean | void
 
 function forEachRunner<T extends (...args: any[]) => any>(fns: T[]) {
   return function (this: any, ...args: Parameters<T>) {
