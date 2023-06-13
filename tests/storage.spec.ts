@@ -1,8 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { createStorage, prefixWrap, toProrageRaw } from '../lib'
+import {
+  createStorage,
+  prefixWrap,
+  toProrageRaw,
+  Parse,
+  Stringify,
+} from '../lib'
 import { nextTick } from './utils/wait'
 import { createMemoryStorage } from './utils/memoryStorage'
 import { toRaw } from '@vue/reactivity'
+import { replaceRunner } from '../lib/hook'
 
 describe('storage', () => {
   let storage: any
@@ -102,6 +109,45 @@ describe('storage', () => {
 
       delete storage.foo
       expect(sessionStorage.getItem('foo')).toBe(null)
+    })
+
+    it('stringify and parse', () => {
+      const storage = createStorage({
+        saveFlush: 'sync',
+        stringify(value, replacer) {
+          const replaces: Stringify[] = []
+
+          replaces.push((_, value) => {
+            if (typeof value !== 'bigint') return value
+            return {
+              '##bigint': value.toString(),
+            }
+          })
+
+          if (replacer) replaces.push(replacer)
+
+          return JSON.stringify(value, replaceRunner(replaces))
+        },
+        parse: (value, reviver) => {
+          const revivers: Parse[] = []
+
+          revivers.push((_, value) => {
+            if (typeof value !== 'object') return value
+            if (!('##bigint' in value)) return value
+            return BigInt(value['##bigint'])
+          })
+
+          if (reviver) revivers.push(reviver)
+
+          return JSON.parse(value, replaceRunner(revivers))
+        },
+      })
+
+      storage.json = 123n
+      expect(localStorage.getItem('json')).toBe('{"##bigint":"123"}')
+
+      storage.reload('json')
+      expect(storage.json).toBe(123n)
     })
 
     describe('prefix: test#', () => {

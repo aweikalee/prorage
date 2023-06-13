@@ -36,16 +36,20 @@ import { createStorage, expiresPlugin } from 'prorage'
 
 const storage = createStorage({
   storage: localStorage,
+  stringify: JSON.stringify,
+  parse: JSON.parse,
   saveFlush: 'async',
-  plugins: [
-    expiresPlugin()
-  ]
+  plugins: [expiresPlugin()],
+
+  prefix: 'prefix#',
 })
 ```
 
 | 参数 | 类型 | 默认值 | 说明 |
 | :-: | :-: | :-: | :-: |
 | storage | StorageLike | `localStorage` | 储存对象 |
+| stringify | StringifyLike | `JSON.stringify` | 转换为 JSON 字符串的方法 |
+| parse | ParseLike | `JSON.parse` | 解析 JSON 字符串的方法 |
 | saveFlush | `sync` \| `async` | `async` | 保存的执行时机 |
 | plugins | ProragePlugin[] | `[]` | 插件 |
 | prefix | string |  | 储存键名前缀 |

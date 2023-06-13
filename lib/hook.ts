@@ -49,7 +49,9 @@ function forEachRunner<T extends (...args: any[]) => any>(fns: T[]) {
   }
 }
 
-function replaceRunner(replacers: (Stringify | Parse)[]): Stringify | Parse {
+export function replaceRunner(
+  replacers: (Stringify | Parse)[]
+): Stringify | Parse {
   if (!replacers.length) return (_, value) => value
 
   return function (key, value) {

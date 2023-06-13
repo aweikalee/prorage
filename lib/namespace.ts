@@ -2,12 +2,14 @@ import { reactive, ref } from '@vue/reactivity'
 import { proxyNamespace } from './proxy'
 import { createHooks, type ProragePlugin } from './hook'
 import { invalidateJob, queueJob, watch } from './watch'
-import { type StorageLike } from './types'
+import { type StringifyLike, type StorageLike, type ParseLike } from './types'
 import { extraPlugin } from './plugins/extra'
 import { Flags, prefixWrap } from './shared'
 
 export interface NamespaceOptions {
   storage?: StorageLike
+  stringify?: StringifyLike
+  parse?: ParseLike
   plugins?: ProragePlugin[]
   saveFlush?: 'sync' | 'async'
   prefix?: string
@@ -18,6 +20,8 @@ export function createNamespace<T = any>(
   options: NamespaceOptions = {}
 ) {
   const storage = options.storage ?? localStorage
+  const stringify = options.stringify ?? JSON.stringify
+  const parse = options.parse ?? JSON.parse
   const saveFlush = options.saveFlush ?? 'async'
   const keyWithPrefix = prefixWrap(options.prefix, key)
 
@@ -42,7 +46,7 @@ export function createNamespace<T = any>(
 
     let data
     if (text) {
-      data = JSON.parse(text, hooks.parse) ?? {}
+      data = parse(text, hooks.parse) ?? {}
     }
 
     hooks.afterParse()
@@ -56,7 +60,7 @@ export function createNamespace<T = any>(
   }
   function save() {
     hooks.beforeStringify()
-    const text = JSON.stringify(baseState.value, hooks.stringify)
+    const text = stringify(baseState.value, hooks.stringify)
     hooks.afterStringify()
 
     if (text === undefined) {
