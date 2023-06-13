@@ -5,9 +5,8 @@ import {
   translatePlugin,
 } from 'prorage'
 
-const prefix = 'test#'
 export const storage = createStorage({
-  prefix,
+  prefix: 'test#',
   plugins: [
     expiresPlugin({
       checkInterval: 'raf',
@@ -15,6 +14,8 @@ export const storage = createStorage({
     translatePlugin(),
   ],
 })
+
+addEventListener('storage', ({ key }) => storage.reload(key))
 
 storage.normal = 'hello world'
 

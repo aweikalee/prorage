@@ -86,6 +86,11 @@ temp === storage.test // false
 
 在调用 `reload` 后 `storage.test` 上的引用被替换为重新读取的数据, 原先储存的 `temp` 不再是 `storage.test` 的数据. 故再对 `temp` 对象进行修改, 不会再影响 `storage.test`.
 
+##### with storage event
+```js
+addEventListener('storage', ({ key }) => storage.reload(key))
+```
+
 #### save
 主动保存数据, 通常不需要主动调用.
 ```js
