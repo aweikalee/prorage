@@ -55,6 +55,14 @@ const storage = createStorage({
 - `plugins` 相关的内容, 请阅读后文的 **内置 Plugin** 与 [Plugin 的开发](./docs/plugin.md).
 
 ### API
+#### clear
+清空数据.
+```js
+storage.clear() // 清空所有数据(符合 preifx 的数据)
+
+storage.clear('foo') // 清空 foo 命名空间下的数据
+```
+
 #### reload
 重新读取数据.
 ```js

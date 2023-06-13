@@ -27,6 +27,23 @@ describe('storage', () => {
     expect(storage.foo).toBe(undefined)
   })
 
+  describe('length', () => {
+    it('case 1', () => {
+      localStorage.clear()
+      storage.foo = 1
+      expect(storage.length).toBe(1)
+      storage.bar = 2
+      expect(storage.length).toBe(2)
+    })
+    it('case 2', () => {
+      expect(storage.length).toBe(2)
+    })
+    it('case 3', () => {
+      delete storage.bar
+      expect(storage.length).toBe(1)
+    })
+  })
+
   describe('key', () => {
     it('key: number', () => {
       storage[1] = 'number key'
@@ -44,6 +61,7 @@ describe('storage', () => {
 
   describe('options', () => {
     it('saveFlush: async', async () => {
+      localStorage.clear()
       const storage = createStorage({
         saveFlush: 'async',
       })
@@ -115,6 +133,19 @@ describe('storage', () => {
         delete storage.foo
         expect(localStorage.getItem(prefixWrap(prefix, 'foo'))).toBe(null)
       })
+
+      it('clear', () => {
+        localStorage.clear()
+        localStorage.setItem('other', '')
+        storage.foo = 'bar'
+        storage.bar = 'baz'
+        expect(storage.length).toBe(2)
+        expect(localStorage.length).toBe(3)
+
+        storage.clear()
+        expect(storage.length).toBe(0)
+        expect(localStorage.length).toBe(1)
+      })
     })
   })
 
@@ -139,6 +170,40 @@ describe('storage', () => {
 
       storage.save('foo')
       expect(localStorage.getItem('foo')).toBe(JSON.stringify('baz'))
+    })
+
+    describe('clear', () => {
+      it('all', () => {
+        localStorage.clear()
+
+        storage.foo = 'bar'
+        storage.bar = 'baz'
+        expect(storage.length).toBe(2)
+
+        storage.clear()
+        expect(storage.length).toBe(0)
+      })
+
+      it('before created', () => {
+        localStorage.setItem('foo', '')
+        expect(localStorage.getItem('foo')).toBe('')
+        storage.clear('foo')
+        expect(localStorage.getItem('foo')).not.toBe('')
+        expect(storage.foo).toBe(undefined)
+      })
+
+      it('with key', () => {
+        localStorage.clear()
+
+        storage.foo = 'bar'
+        storage.bar = 'baz'
+        expect(storage.length).toBe(2)
+
+        storage.clear('foo')
+        expect(storage.length).toBe(1)
+        expect(storage.foo).toBe(undefined)
+        expect(storage.bar).toBe('baz')
+      })
     })
   })
 })

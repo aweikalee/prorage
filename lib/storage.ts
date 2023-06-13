@@ -142,6 +142,26 @@ export function createStorage<T extends object = any>(
 
       namespace.reload()
     },
+    clear(key?: string) {
+      if (key === undefined) {
+        Object.keys(proxy).forEach((key) => prototype.clear(key))
+        return
+      }
+
+      if (!isString(key)) {
+        throw new Error(`Namespace key should be string.`)
+      }
+
+      let namespace = Reflect.get(baseStorage, key)
+      if (!namespace) {
+        namespace = _createNamespace(key)
+        Reflect.set(reactiveStorage, key, namespace)
+      }
+
+      if (!isNamespace(namespace)) return
+
+      namespace.clear()
+    },
 
     get length() {
       return Object.keys(proxy).length
