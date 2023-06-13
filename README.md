@@ -280,5 +280,8 @@ type MyStorage = {
 const storage = createStorage<MyStorage>()
 ```
 
+### With React
+就和 `@vue/reactivity` 在 React 中使用一样, 实现方式很多, 以下是一种简单的使用示例: [prorage with react - StackBlitz](https://stackblitz.com/edit/prorage-with-react?file=src%2FApp.jsx).
+
 ### 为什么无法驱动 Vue 更新
 若使用的 *vue.xxx.global.js* 或是 *vue.xxx-browser.js* 版本的 Vue, 会导致与 `prorage` 所依赖的 `@vue/reactivity` 不是同一份代码, 使得两者 `trigger` 事件相互独立. 应避免使用这两类版本的 Vue. 
