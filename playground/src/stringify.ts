@@ -1,6 +1,8 @@
+import { isObject, toRawType } from '@vue/shared'
+
 const SIGN = Date.now()
-const LEFT_MARK = `__${SIGN}`
-const RIGHT_MARK = `${SIGN}__`
+const LEFT_MARK = `_#_${SIGN}`
+const RIGHT_MARK = `${SIGN}_#_`
 const REGEXP = new RegExp(`"${LEFT_MARK}(.*?)${RIGHT_MARK}"`, 'g')
 
 function mark(text: string) {
@@ -11,7 +13,7 @@ function unmark(text: string) {
   return text.replace(REGEXP, '$1')
 }
 
-function jsReplacer(_: string, value: unknown) {
+function primitiveReplacer(_: string, value: unknown) {
   switch (typeof value) {
     case 'undefined':
       return mark('undefined')
@@ -26,6 +28,19 @@ function jsReplacer(_: string, value: unknown) {
       return mark(value.toString())
     case 'bigint':
       return mark(`${value}n`)
+    default:
+      return value
+  }
+}
+
+function objectReplacer(key: string, value: unknown) {
+  const rawValue = this[key]
+  if (!isObject(rawValue)) return value
+  switch (toRawType(rawValue)) {
+    case 'Date':
+      return mark(`Date(${rawValue.toISOString()})`)
+    case 'RegExp':
+      return mark(rawValue.toString())
     default:
       return value
   }
@@ -78,9 +93,14 @@ function serializer(
 export function jsStringify(
   value: any,
   replacer: (this: any, key: string, value: any) => any,
-  space: number | string
+  space?: number | string
 ) {
-  const replacers = serializer(replacer, createCircularReplacer(), jsReplacer)
+  const replacers = serializer(
+    replacer,
+    createCircularReplacer(),
+    primitiveReplacer,
+    objectReplacer
+  )
   const reuslt = JSON.stringify(value, replacers, space)
   return unmark(reuslt)
 }
