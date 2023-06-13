@@ -142,6 +142,10 @@ export function createStorage<T extends object = any>(
 
       namespace.reload()
     },
+
+    get length() {
+      return Object.keys(proxy).length
+    },
   }
   Object.setPrototypeOf(baseStorage, prototype)
 
