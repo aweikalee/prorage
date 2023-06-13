@@ -284,6 +284,22 @@ storage.foo = Symbol.for('123')
 ### Plugin 的开发
 [Plugin 的开发](./docs/plugin.md)
 
+### 循环引用
+可以借助 [flatted](https://github.com/WebReflection/flatted) 之类的 JSON 库来解决循环引用的问题.
+
+```js
+import { stringify, parse, } from 'flatted'
+import { createStorage } from 'prorage'
+
+const storage = createStorage({
+  stringify,
+  parse,
+})
+
+storage.test = {}
+storage.test.circular = storage.test
+```
+
 ### With TypeScript
 ```ts
 import { createStorage } from 'prorage'
