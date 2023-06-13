@@ -137,6 +137,11 @@ export function createStorage<T extends object = any>(
         throw new Error(`Namespace key should be string.`)
       }
 
+      const _prefix = prefixWrap(prefix, '')
+      if (key.startsWith(_prefix)) {
+        key = prefixUnwrap(prefix, key)
+      }
+
       const namespace = Reflect.get(baseStorage, key)
       if (!isNamespace(namespace)) return
 
