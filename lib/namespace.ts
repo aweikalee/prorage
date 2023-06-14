@@ -1,7 +1,7 @@
 import { reactive, ref } from '@vue/reactivity'
 import { proxyNamespace } from './proxy'
 import { createHooks, type ProragePlugin } from './hook'
-import { invalidateJob, queueJob, watch } from './watch'
+import { watch } from './watch'
 import { type StringifyLike, type StorageLike, type ParseLike } from './types'
 import { extraPlugin } from './plugins/extra'
 import { Flags, prefixWrap } from './shared'
@@ -38,9 +38,7 @@ export function createNamespace<T = any>(
   const state = proxyNamespace(reactiveState, hooks)
 
   /* load and save */
-  let isReloading = false
   function reload() {
-    invalidateJob(save)
     const text = storage.getItem(keyWithPrefix)
 
     hooks.beforeParse()
@@ -53,10 +51,10 @@ export function createNamespace<T = any>(
     hooks.afterParse()
 
     try {
-      isReloading = true
+      stopWatch()
       reactiveState.value = data
     } finally {
-      isReloading = false
+      stopWatch.run()
     }
   }
   function save() {
@@ -74,20 +72,10 @@ export function createNamespace<T = any>(
     delete state.value
   }
 
-  watch(
-    () => reactiveState.value,
-    () => {
-      if (isReloading) return
-      if (saveFlush === 'async') {
-        queueJob(save)
-      } else {
-        save()
-      }
-    },
-    {
-      deep: true,
-    }
-  )
+  const stopWatch = watch(() => reactiveState.value, save, {
+    deep: true,
+    flush: saveFlush,
+  })
 
   try {
     reload()

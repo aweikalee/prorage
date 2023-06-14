@@ -49,7 +49,7 @@ export function watch<T = any>(
   source: WatchSource<T>,
   cb: WatchCallback,
   options: WatchOptions = {}
-): Function {
+) {
   return doWatch(source as any, cb, options)
 }
 
@@ -109,10 +109,19 @@ function doWatch(
   }
 
   const unwatch = () => {
+    invalidateJob(job)
     effect.stop()
   }
+  const prototype = {
+    run() {
+      effect.active = true
+      effect.run()
+    },
+  }
+  Object.setPrototypeOf(prototype, Object.getPrototypeOf(unwatch))
+  Object.setPrototypeOf(unwatch, prototype)
 
-  return unwatch
+  return unwatch as typeof unwatch & typeof prototype
 }
 
 function traverse(value: any, seen?: Set<unknown>) {
