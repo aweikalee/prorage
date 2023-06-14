@@ -1,7 +1,7 @@
 import {
   createStorage,
   expiresPlugin,
-  setExpires,
+  useExpires,
   translatePlugin,
 } from 'prorage'
 
@@ -20,10 +20,26 @@ addEventListener('storage', ({ key }) => storage.reload(key))
 storage.normal = 'hello world'
 
 storage.array = []
-setExpires({ seconds: 3 })
-storage.array.push('expires 3 seconds')
-setExpires({ seconds: 10 })
-storage.array.push('expires 10 seconds')
+storage.array.push(
+  useExpires('expires 1 seconds', {
+    seconds: 1,
+  })
+)
+storage.array.unshift(
+  useExpires('expires 2 seconds', {
+    seconds: 2,
+  })
+)
+storage.array.splice(
+  0,
+  0,
+  useExpires('expires 3 seconds', {
+    seconds: 3,
+  })
+)
+storage.array[3] = useExpires('expires 10 seconds', {
+  seconds: 10,
+})
 
 storage.translate = {
   BigInt: BigInt('123'),

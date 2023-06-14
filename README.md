@@ -50,7 +50,7 @@ const storage = createStorage({
 | storage | StorageLike | `localStorage` | 储存对象 |
 | stringify | StringifyLike | `JSON.stringify` | 转换为 JSON 字符串的方法 |
 | parse | ParseLike | `JSON.parse` | 解析 JSON 字符串的方法 |
-| saveFlush | `sync` \| `async` | `async` | 保存的执行时机 |
+| saveFlush | `"sync"` \| `"async"` | `"async"` | 保存的执行时机 |
 | plugins | ProragePlugin[] | `[]` | 插件 |
 | prefix | string |  | 储存键名前缀 |
 
@@ -104,40 +104,28 @@ storage.save('foo')
 为数据增加附加属性. 作为一个基础 **Plugin**, 不需要声明使用.
 
 ```js
-import { createStorage, setActiveExtra } from 'prorage'
+import { createStorage, useExtra } from 'prorage'
 const storage = createStorage()
 
-setActiveExtra('test', 'hello world')
-storage.foo = 'bar'
+storage.foo = useExtra('bar', {
+  test: 'hello world'
+})
 
 getExtra(storage, 'foo') // { test: 'hello world' }
 ```
 
-`setActiveExtra`, `deleteActiveExtra`, `getActiveExtra` 所管理的 `activeExtra` 是一份临时数据, 在下一次赋值操作时作为附加属性与赋值的数据绑定.
-
-需要注意的时绑定附加属性时, 是以覆盖的形式进行的. 若赋值前该数据已存在 `a` 附加属性, 赋值时的 `actvieExtra` 上只有 `b`, 那么赋值后绑定的附加属性则只有 `b`.
-
 #### API
+
+##### useExtra
+生成一个具有附加属性的数据.
+```ts
+function useExtra<T>(value: T, extra: Record<string, unknown>): T
+```
 
 ##### getExtra
 获得 `target` 对象上 `key` 键名绑定的附加属性.
 ```ts
 function getExtra(target: object, key: string | symbol): Record<string, unknown>
-```
-
-##### setActiveExtra
-```ts
-function setActiveExtra(key: string, value: unknown): void
-```
-
-##### deleteActiveExtra
-```ts
-function deleteActiveExtra(key: string): void
-```
-
-##### getActiveExtra
-```ts
-function getActiveExtra(key: string): unkonwn
 ```
 
 ---
@@ -146,7 +134,7 @@ function getActiveExtra(key: string): unkonwn
 允许为数据设置有效期.
 
 ```js
-import { createStorage, expiresPlugin, setExpires } from 'prorage'
+import { createStorage, expiresPlugin, useExpires } from 'prorage'
 const storage = createStorage({
   plugins: [
     expiresPlugin({
@@ -155,8 +143,7 @@ const storage = createStorage({
   ]
 })
 
-setExpires({ days: 7 })
-storage.foo = 'bar'
+storage.foo = useExpires('bar', { days: 7 })
 ```
 
 #### Options
@@ -168,9 +155,9 @@ storage.foo = 'bar'
 - `checkInterval` 为 `"raf"` 或 `number` 时, 会通过 `requestAnimationFrame/setTimeout` 不断访问数据来触发过期删除. 只有**被访问过**的数据才会加入到检查队列中.
 
 #### API
-##### setExpires
+##### useExpires
 ```ts
-function setExpires(expires: ExpiresDate): void
+function useExpires<T>(value: T, expires: ExpiresDate): T
 
 type ExpiresDate = number | Date | ExpiresDateOptions
 type ExpiresDateOptions = {
@@ -183,7 +170,6 @@ type ExpiresDateOptions = {
 }
 ```
 
-- 调用 `setExpires` 后, 下一次赋值操作时, 将会为数据设置过期时间.
 - `expires` 为 `number`, 时间戳, 作为过期的绝对时间.
 - `expires` 为 `Date`, 作为过期的绝对时间.
 - `expires` 为 `ExpiresDateOptions`, 作为过期的相对时间(相对当前时间).

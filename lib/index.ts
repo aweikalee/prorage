@@ -28,16 +28,11 @@ export { watch, watchEffect } from './watch'
 
 export * from './types'
 
-export {
-  getExtra,
-  setActiveExtra,
-  deleteActiveExtra,
-  getActiveExtra,
-} from './plugins/extra'
+export { useExtra, getExtra } from './plugins/extra'
 
 export {
   expiresPlugin,
-  setExpires,
+  useExpires,
   type ExpiresDateOptions,
   type ExpiresDate,
 } from './plugins/expires'

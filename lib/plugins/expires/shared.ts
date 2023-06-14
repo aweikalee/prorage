@@ -1,5 +1,5 @@
 import { toRawType } from '@vue/shared'
-import { deleteActiveExtra, setActiveExtra } from '../extra'
+import { useExtra } from '../extra'
 
 export type ExpiresDateOptions = {
   seconds?: number
@@ -30,11 +30,10 @@ function toTimestamp(value: ExpiresDate) {
   }
 }
 
-export function setExpires(expires?: ExpiresDate) {
-  if (expires) {
-    const timestamp = toTimestamp(expires)
-    setActiveExtra('expires', timestamp)
-  } else {
-    deleteActiveExtra('expires')
-  }
+export function useExpires<T>(value: T, expires: ExpiresDate): T {
+  const timestamp = toTimestamp(expires)
+
+  return useExtra(value, {
+    expires: timestamp,
+  })
 }

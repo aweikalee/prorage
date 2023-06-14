@@ -1,15 +1,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import {
+  ExpiresDate,
   createStorage,
   expiresPlugin,
-  getActiveExtra,
-  setExpires,
+  useExpires,
 } from '../../lib'
 import { PRIMARY_KEY } from '../../lib/plugins/expires/plugin'
 import { PRIMARY_KEY as EXTRA_PRIMARY_KEY } from '../../lib/plugins/extra'
 import { wait } from '../utils/wait'
-
-const getExpires = () => getActiveExtra(PRIMARY_KEY)
 
 describe('expires plugin', () => {
   beforeEach(() => {
@@ -27,38 +25,57 @@ describe('expires plugin', () => {
   })
 
   it('setExpires', () => {
-    setExpires(1000)
-    expect(getExpires()).toBe(1000)
+    const tests: {
+      value: ExpiresDate
+      target: number
+    }[] = [
+      {
+        value: 1000,
+        target: 1000,
+      },
+      {
+        value: new Date(2023, 6, 10),
+        target: new Date(2023, 6, 10).getTime(),
+      },
+      {
+        value: {
+          seconds: 1,
+          minutes: 2,
+          hours: 3,
+          days: 4,
+          months: 5,
+          years: 6,
+        },
+        target: new Date(2029, 11, 14, 3, 2, 1).getTime(),
+      },
+    ]
 
-    setExpires(0)
-    expect(getExpires()).toBe(undefined)
-
-    setExpires(new Date(2023, 6, 10))
-    expect(getExpires()).toBe(new Date(2023, 6, 10).getTime())
-
-    setExpires()
-    expect(getExpires()).toBe(undefined)
-
-    setExpires({
-      seconds: 1,
-      minutes: 2,
-      hours: 3,
-      days: 4,
-      months: 5,
-      years: 6,
+    tests.forEach(({ value, target }) => {
+      expect(useExpires('', value)).toEqual({
+        value: '',
+        [EXTRA_PRIMARY_KEY]: {
+          [PRIMARY_KEY]: target,
+        },
+      })
     })
-    expect(getExpires()).toBe(new Date(2029, 11, 14, 3, 2, 1).getTime())
 
     vi.setSystemTime(new Date(2023, 12, 31, 23, 59, 59))
-    setExpires({
-      seconds: 1,
+    expect(
+      useExpires('', {
+        seconds: 1,
+      })
+    ).toEqual({
+      value: '',
+      [EXTRA_PRIMARY_KEY]: {
+        [PRIMARY_KEY]: new Date(2024, 1, 1, 0, 0, 0).getTime(),
+      },
     })
-    expect(getExpires()).toBe(new Date(2024, 1, 1, 0, 0, 0).getTime())
   })
 
   it('set', () => {
-    setExpires({ days: 1 })
-    storage.value = 'bar'
+    storage.value = useExpires('bar', {
+      days: 1,
+    })
 
     expect(JSON.parse(localStorage.getItem('value')!)).toEqual({
       value: 'bar',

@@ -5,18 +5,21 @@ import { isStorage, toProrageRaw } from '../shared'
 
 export const PRIMARY_KEY = '__p_extra'
 
-let activeExtra: Record<string, unknown> = {}
-export function setActiveExtra(key: string, value: unknown) {
-  activeExtra[key] = value
-}
-export function deleteActiveExtra(key: string) {
-  delete activeExtra[key]
-}
-export function getActiveExtra(key: string) {
-  return activeExtra[key]
-}
-function clearActiveExtra() {
-  activeExtra = {}
+export function useExtra<T>(value: T, extra: Record<string, unknown> = {}): T {
+  if (isObject(value) && PRIMARY_KEY in value) {
+    return {
+      [PRIMARY_KEY]: {
+        ...value[PRIMARY_KEY],
+        ...extra,
+      },
+      value: value.value,
+    } as T
+  } else {
+    return {
+      [PRIMARY_KEY]: extra,
+      value,
+    } as T
+  }
 }
 
 export function getExtra(target: object, key: string | symbol) {
@@ -50,18 +53,6 @@ export const extraPlugin: ProragePlugin = {
       }
     }
 
-    return value
-  },
-
-  set(_, __, value) {
-    if (activeExtra && Object.keys(activeExtra).length) {
-      value = {
-        [PRIMARY_KEY]: activeExtra,
-        value,
-      }
-    }
-
-    clearActiveExtra()
     return value
   },
 }

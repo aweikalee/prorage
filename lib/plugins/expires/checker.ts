@@ -1,6 +1,9 @@
 import { toRaw } from '@vue/reactivity'
+import { isArray, isIntegerKey } from '@vue/shared'
 
 export type ExpiresInterval = 'none' | 'raf' | number
+
+const arrayTraverseKey = Symbol.for('__p_array')
 
 export class ExpiresChecker {
   map = new Map<object, Map<string | symbol, () => any>>()
@@ -15,9 +18,16 @@ export class ExpiresChecker {
     let map = this.map.get(raw)
     if (!map) this.map.set(raw, (map = new Map()))
 
-    map.set(key, () => {
-      Reflect.get(receiver, key)
-    })
+    if (isArray(receiver) && isIntegerKey(key)) {
+      map.set(arrayTraverseKey, () => {
+        receiver.forEach(() => {})
+      })
+    } else {
+      map.set(key, () => {
+        Reflect.get(receiver, key)
+      })
+    }
+
     this.raf()
   }
 

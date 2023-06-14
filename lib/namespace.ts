@@ -5,6 +5,7 @@ import { invalidateJob, queueJob, watch } from './watch'
 import { type StringifyLike, type StorageLike, type ParseLike } from './types'
 import { extraPlugin } from './plugins/extra'
 import { Flags, prefixWrap } from './shared'
+import { arrayPlugin } from './plugins/array'
 
 export interface NamespaceOptions {
   storage?: StorageLike
@@ -25,7 +26,7 @@ export function createNamespace<T = any>(
   const saveFlush = options.saveFlush ?? 'async'
   const keyWithPrefix = prefixWrap(options.prefix, key)
 
-  const plugins = [...(options.plugins ?? []), extraPlugin]
+  const plugins = [arrayPlugin, ...(options.plugins ?? []), extraPlugin]
   const hooks = createHooks(plugins)
 
   /* proxy */

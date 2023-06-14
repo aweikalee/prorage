@@ -1,11 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import {
-  createStorage,
-  getActiveExtra,
-  setActiveExtra,
-  deleteActiveExtra,
-} from '../../lib'
-import { PRIMARY_KEY, getExtra } from '../../lib/plugins/extra'
+import { createStorage, useExtra, getExtra } from '../../lib'
+import { PRIMARY_KEY } from '../../lib/plugins/extra'
 
 describe('extra plugin', () => {
   let storage: any
@@ -15,16 +10,40 @@ describe('extra plugin', () => {
     })
   })
 
-  it('activeExtra', () => {
-    setActiveExtra('test', 1)
-    expect(getActiveExtra('test')).toBe(1)
-    deleteActiveExtra('test')
-    expect(getActiveExtra('test')).toBe(undefined)
+  it('useExtra', () => {
+    expect(
+      useExtra('', {
+        test: 1,
+      })
+    ).toEqual({
+      value: '',
+      [PRIMARY_KEY]: {
+        test: 1,
+      },
+    })
+
+    expect(
+      useExtra(
+        useExtra('', {
+          test: 1,
+        }),
+        {
+          test2: 2,
+        }
+      )
+    ).toEqual({
+      value: '',
+      [PRIMARY_KEY]: {
+        test: 1,
+        test2: 2,
+      },
+    })
   })
 
   it('set', () => {
-    setActiveExtra('test', 1)
-    storage.foo = 'bar'
+    storage.foo = useExtra('bar', {
+      test: 1,
+    })
     expect(JSON.parse(localStorage.getItem('foo')!)).toEqual({
       value: 'bar',
       [PRIMARY_KEY]: {
@@ -44,8 +63,9 @@ describe('extra plugin', () => {
       test: 1,
     })
 
-    setActiveExtra('overwrite', 2)
-    storage.foo = 'bar'
+    storage.foo = useExtra('bar', {
+      overwrite: 2,
+    })
     expect(getExtra(storage, 'foo')).toStrictEqual({
       overwrite: 2,
     })
