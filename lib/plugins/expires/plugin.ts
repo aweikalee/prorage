@@ -5,7 +5,6 @@ import { getExtra } from '../extra'
 
 export type ExpiresPluginOptions = {
   checkInterval?: ExpiresInterval
-  primaryKey?: string
 }
 
 export const PRIMARY_KEY = 'expires'
@@ -13,7 +12,7 @@ export const PRIMARY_KEY = 'expires'
 export function expiresPlugin(
   options: ExpiresPluginOptions = {}
 ): ProragePlugin {
-  const { checkInterval = 'none', primaryKey = PRIMARY_KEY } = options
+  const { checkInterval = 'none' } = options
 
   return () => {
     const checker = new ExpiresChecker(checkInterval)
@@ -23,7 +22,7 @@ export function expiresPlugin(
       },
 
       get(target, key, value, receiver) {
-        const expires = getExtra(target, key)?.[primaryKey] as
+        const expires = getExtra(target, key)?.[PRIMARY_KEY] as
           | number
           | undefined
 
@@ -38,7 +37,7 @@ export function expiresPlugin(
             }
             return
           } else {
-            checker.set(receiver, key)
+            checker.set(receiver, key, expires)
           }
         }
 

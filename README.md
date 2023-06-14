@@ -152,7 +152,8 @@ storage.foo = useExpires('bar', { days: 7 })
 | checkInterval | 'none' | 'raf' | number | `"none"` | 检查过期时间的间隔 |
 
 - 过期数据并**不会立即删除**, 而是**下次被访问时**才会被删除.
-- `checkInterval` 为 `"raf"` 或 `number` 时, 会通过 `requestAnimationFrame/setTimeout` 不断访问数据来触发过期删除. 只有**被访问过**的数据才会加入到检查队列中.
+- `checkInterval` 为 `"raf"` 或 `number` 时, 会通过 `requestAnimationFrame/setTimeout` 定期检查数据是否过期. 只有**被访问过**的数据才会加入到检查队列中. 
+- 使用 `setTimeout` 时有补偿机制, 当 `数据过期时间 - Date.now()` 大于 `checkInterval`, 则下次运行时间取 `数据过期时间 - Date.now()`.
 
 #### API
 ##### useExpires

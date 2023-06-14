@@ -2,6 +2,7 @@ import { toRawType } from '@vue/shared'
 import { useExtra } from '../extra'
 
 export type ExpiresDateOptions = {
+  milliseconds?: number
   seconds?: number
   minutes?: number
   hours?: number
@@ -20,6 +21,7 @@ function toTimestamp(value: ExpiresDate) {
     const d = new Date()
     const v = value as Required<ExpiresDateOptions>
 
+    if (+v.milliseconds) d.setMilliseconds(d.getMilliseconds() + v.milliseconds)
     if (+v.seconds) d.setSeconds(d.getSeconds() + v.seconds)
     if (+v.minutes) d.setMinutes(d.getMinutes() + v.minutes)
     if (+v.hours) d.setHours(d.getHours() + v.hours)
