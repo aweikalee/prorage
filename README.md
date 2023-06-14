@@ -59,7 +59,7 @@ const storage = createStorage({
 - `plugins` 相关的内容, 请阅读后文的 **内置 Plugin** 与 [Plugin 的开发](./docs/plugin.md).
 
 ### API
-#### clear
+#### storage.clear
 清空数据.
 ```js
 storage.clear() // 清空所有数据(符合 preifx 的数据)
@@ -67,7 +67,7 @@ storage.clear() // 清空所有数据(符合 preifx 的数据)
 storage.clear('foo') // 清空 foo 命名空间下的数据
 ```
 
-#### reload
+#### storage.reload
 重新读取数据.
 ```js
 storage.reload('foo')
@@ -91,11 +91,29 @@ temp === storage.test // false
 addEventListener('storage', ({ key }) => storage.reload(key))
 ```
 
-#### save
+#### storage.save
 主动保存数据, 通常不需要主动调用.
 ```js
 storage.save('foo')
 ```
+
+#### watch
+与 Vue 的 `watch` 使用方式相同, 但做了较多阉割. 该 API 主要面向不使用 Vue 的项目.
+```js
+watch(
+  () => storage,
+  () => {
+    console.log('change')
+  }, {
+    deep: true,
+    flush: 'async'
+  }
+)
+```
+
+- 第一个参数 `source`, 仅支持函数形式.
+- 第二个参数 `callback`, 未提供 `oldValue` 与 `newValue`.
+- 第三个参数 `options`, `deep` 与 `immediate` 和 Vue 基本一致. `flush` 仅支持 `sync` 与 `async`, `sync` 和 Vue 一致, `async` 异步执行.
 
 ---
 
