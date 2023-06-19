@@ -1,7 +1,7 @@
 # Plugin 的开发
 **Plugin** 其实就是声明了一系列 Hook, 在特定的时机被调用.
 
-在开发之前, 建议先了解 [prorage 的构成](./structure.md).
+在开发之前, 建议先了解 [Prorage 的构成](./structure.md).
 
 ## 类型
 ```ts

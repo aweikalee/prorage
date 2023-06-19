@@ -1,4 +1,4 @@
-# prorage 的构成
+# Prorage 的构成
 
 ## 名词解释
 - **Storage**: 由 `createStorage` 创建, 本质是为了更方便创建和使用 **Namespace**.

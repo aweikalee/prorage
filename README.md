@@ -3,21 +3,67 @@
 
 `Prorage` = `Proxy` + `Storage`
 
-**[playground]**: [Stackblitz](https://stackblitz.com/edit/prorage-playground?file=src%2Fstorage.ts)
+**[Playground]**: [Stackblitz](https://stackblitz.com/edit/prorage-playground?file=src%2Fstorage.ts)
 
-## 安装
+## 目录
+
+- [Prorage](#prorage)
+  - [目录](#目录)
+  - [特性](#特性)
+  - [快速上手](#快速上手)
+    - [安装](#安装)
+    - [使用](#使用)
+  - [Storage 实例](#storage-实例)
+    - [Options](#options)
+    - [API](#api)
+      - [storage.clear](#storageclear)
+      - [storage.reload](#storagereload)
+        - [with storage event](#with-storage-event)
+      - [storage.save](#storagesave)
+      - [watch](#watch)
+  - [内置 Plugin](#内置-plugin)
+    - [extraPlugin 附加属性](#extraplugin-附加属性)
+      - [API](#api-1)
+        - [useExtra](#useextra)
+        - [getExtra](#getextra)
+    - [expiresPlugin 有效期](#expiresplugin-有效期)
+      - [Options](#options-1)
+      - [API](#api-2)
+        - [useExpires](#useexpires)
+    - [translatePlugin 数据转换](#translateplugin-数据转换)
+      - [Options](#options-2)
+        - [dictionary](#dictionary)
+  - [其他](#其他)
+    - [数据类型支持情况](#数据类型支持情况)
+      - [基础类型](#基础类型)
+      - [引用类型](#引用类型)
+    - [Plugin 的开发](#plugin-的开发)
+    - [循环引用](#循环引用)
+    - [With TypeScript](#with-typescript)
+    - [With React](#with-react)
+    - [为什么无法驱动 Vue 更新](#为什么无法驱动-vue-更新)
+
+
+## 特性
+- 可以像普通变量一样使用 **Storage**.
+- 可定制化, 可以通过 Plugin 来实现大部分定制化需求.
+- 无副作用, 支持 Tree Shaking.
+- 基于 `@vue/reactivity` 实现, 可以很好的配合 Vue 使用.
+- 更适合不使用 Vuex/Pinia 的 Vue 项目, 但也可以不配合 Vue 使用.
+
+## 快速上手
+### 安装
 ```sh
 npm install @vue/reactivity
 npm install prorage
 ```
+如果你已经安装了 Vue, 则不需要再安装 `@vue/reactivity`.
 
-## 使用
+### 使用
 ```js
 import { createStorage } from 'prorage'
 
-const storage = createStorage({
-  storage: localStorage
-})
+const storage = createStorage()
 
 
 storage.foo = 'foo'
@@ -180,6 +226,7 @@ function useExpires<T>(value: T, expires: ExpiresDate): T
 
 type ExpiresDate = number | Date | ExpiresDateOptions
 type ExpiresDateOptions = {
+  milliseconds?: number
   seconds?: number
   minutes?: number
   hours?: number
@@ -322,7 +369,7 @@ const storage = createStorage<MyStorage>()
 ```
 
 ### With React
-就和 `@vue/reactivity` 在 React 中使用一样, 实现方式很多, 以下是一种简单的使用示例: [prorage with react - StackBlitz](https://stackblitz.com/edit/prorage-with-react?file=src%2FApp.jsx).
+就和 `@vue/reactivity` 在 React 中使用一样, 实现方式很多, 以下是一种简单的使用示例: [Prorage With React - StackBlitz](https://stackblitz.com/edit/prorage-with-react?file=src%2FApp.jsx).
 
 ### 为什么无法驱动 Vue 更新
 若使用的 *vue.xxx.global.js* 或是 *vue.xxx-browser.js* 版本的 Vue, 会导致与 `prorage` 所依赖的 `@vue/reactivity` 不是同一份代码, 使得两者 `trigger` 事件相互独立. 应避免使用这两类版本的 Vue. 
