@@ -2,7 +2,7 @@
 
 ## 名词解释
 - **Storage**: 由 `createStorage` 创建, 本质是为了更方便创建和使用 **Namespace**.
-- **Namespace**: 由 `createNamespace` 创建, 是 `prorage` 的核心部分, **Plugin** 均在 **Namespace** 中被调用. 每个 **Namespace** 都在 `StorageLike` 上对应一个键名, 赋值在 **Namespace** 的值则会被转换为字符串保存在 `StorageLinke` 的键值中.
+- **Namespace**: 由 `createNamespace` 创建, 是 `prorage` 的核心部分, **Plugin** 均在 **Namespace** 中被调用. 每个 **Namespace** 都在 `StorageLike` 上对应一个键名, 赋值在 **Namespace** 的值则会被转换为字符串保存在 `StorageLike` 的键值中.
 
 ## 实例结构
 

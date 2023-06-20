@@ -1,4 +1,6 @@
 # Prorage
+中文 | [English](./README.en.md)
+
 基与 ES6 API Proxy 与 [@vue/reactivity](https://github.com/vuejs/core/blob/main/packages/reactivity) 实现, 像普通对象一样使用的 storage.
 
 `Prorage` = `Proxy` + `Storage`
@@ -13,7 +15,7 @@
   - [快速上手](#快速上手)
     - [安装](#安装)
     - [使用](#使用)
-  - [Storage 实例](#storage-实例)
+  - [createStorage](#createstorage)
     - [Options](#options)
     - [API](#api)
       - [storage.clear](#storageclear)
@@ -75,7 +77,7 @@ storage.bar.push('hello')
 
 ---
 
-## Storage 实例
+## createStorage
 ### Options
 ```js
 import { createStorage, expiresPlugin } from 'prorage'
@@ -102,7 +104,7 @@ const storage = createStorage({
 
 - `StorageLike`, 比如 `localStorage`, `sessionStorage`. 应具有方法: `getItem`, `setItem`, `removeItem`. 其中 `getItem` 必须是同步方法.
 - `saveFlush` 为 `async` 时，多次操作会合并为一次保存，而 `sync` 时则会在每次操作后立即保存。
-- `plugins` 相关的内容, 请阅读后文的 **内置 Plugin** 与 [Plugin 的开发](./docs/plugin.md).
+- `plugins` 相关的内容, 请阅读后文的 **内置 Plugin** 与 [Plugin 的开发](./docs/zh/plugin.md).
 
 ### API
 #### storage.clear
@@ -339,7 +341,7 @@ storage.foo = Symbol.for('123')
 | WeakMap | ❌ | ❌ | 没有实现价值 |
 
 ### Plugin 的开发
-[Plugin 的开发](./docs/plugin.md)
+[Plugin 的开发](./docs/zh/plugin.md)
 
 ### 循环引用
 可以借助 [flatted](https://github.com/WebReflection/flatted) 之类的 JSON 库来解决循环引用的问题.
