@@ -240,7 +240,7 @@ type ExpiresDateOptions = {
 
 - `expires` 为 `number`, 时间戳, 作为过期的绝对时间.
 - `expires` 为 `Date`, 作为过期的绝对时间.
-- `expires` 为 `ExpiresDateOptions`, 作为过期的相对时间(相对当前时间).
+- `expires` 为 `ExpiresDateOptions`, 作为过期的相对时间(相对当前时间). 其中 `months` 按自然月天数计算, 不等同于30天.
 
 ---
 

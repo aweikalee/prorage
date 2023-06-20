@@ -21,13 +21,13 @@ function toTimestamp(value: ExpiresDate) {
     const d = new Date()
     const v = value as Required<ExpiresDateOptions>
 
-    if (+v.milliseconds) d.setMilliseconds(d.getMilliseconds() + v.milliseconds)
-    if (+v.seconds) d.setSeconds(d.getSeconds() + v.seconds)
-    if (+v.minutes) d.setMinutes(d.getMinutes() + v.minutes)
-    if (+v.hours) d.setHours(d.getHours() + v.hours)
-    if (+v.days) d.setDate(d.getDate() + v.days)
-    if (+v.months) d.setMonth(d.getMonth() + v.months)
     if (+v.years) d.setFullYear(d.getFullYear() + v.years)
+    if (+v.months) d.setMonth(d.getMonth() + v.months)
+    if (+v.days) d.setDate(d.getDate() + v.days)
+    if (+v.hours) d.setHours(d.getHours() + v.hours)
+    if (+v.minutes) d.setMinutes(d.getMinutes() + v.minutes)
+    if (+v.seconds) d.setSeconds(d.getSeconds() + v.seconds)
+    if (+v.milliseconds) d.setMilliseconds(d.getMilliseconds() + v.milliseconds)
     return d.getTime()
   }
 }

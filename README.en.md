@@ -245,8 +245,7 @@ type ExpiresDateOptions = {
 
 - If `expires` is `number`, timestamp, absolute time for expires.
 - If `expires` is `Date`, absolute time for expires.
-- If `expires` is `ExpiresDateOptions`, relative time for expires (relative to now).
-
+- If `expires` is `ExpiresDateOptions`, it represents the relative time for expiration (relative to now). `months` is calculated based on the natural month, and is not equal to 30 days.
 ---
 
 ### translatePlugin
