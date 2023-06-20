@@ -1,6 +1,6 @@
 {
   "name": "prorage",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Storage used like object, Based on ES6 API Proxy and @vue/reactivity.",
   "type": "module",
   "main": "./dist/prorage.umd.js",
